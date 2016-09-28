@@ -1,0 +1,6 @@
+DisableNetwork 1
+RunAsDaemon 0
+PortForwarding 0
+ControlPort 0
+DirPort 0
+ORPort 0

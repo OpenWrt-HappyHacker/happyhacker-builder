@@ -1,0 +1,8 @@
+DisableNetwork 1
+RunAsDaemon 0
+PortForwarding 0
+ControlPort 0
+DirPort 0
+ORPort 0
+HiddenServiceDir /home/vagrant/.hiddenservice/
+HiddenServicePort 65534 127.0.0.1:65534

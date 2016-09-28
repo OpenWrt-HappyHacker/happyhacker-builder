@@ -1,0 +1,6 @@
+#!/bin/sh
+
+if [[ "`ps | grep '/sbin/tor' | grep -v grep`" = "" ]]
+then
+	/etc/init.d/tor start
+fi

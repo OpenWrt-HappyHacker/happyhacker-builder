@@ -1,0 +1,231 @@
+#!/bin/sh 
+
+# Wifi manager configurations
+. /etc/wm/wm_config
+
+# Libraries
+. /usr/lib/randomizer.sh # To use get_rnd functions
+. /usr/lib/wifimanager.sh # Wifi manager functions
+
+# TODO: Check banner http://www.network-science.de/ascii/
+# Font: graffiti   Reflection: no   Adjustment: center   Stretch: yes      Width: 80	
+HELP=$(cat <<EOF
+
+                               ___ ___    ___ ___  
+                              /   |   \  /   |   \ 
+                             /    ~    \/    ~    \
+                             \    Y    /\    Y    /
+                              \___|_  /  \___|_  / 
+                                    \/         \/  
+                        __      __ .___ ___________.___ 
+                       /  \    /  \|   |\_   _____/|   |
+                       \   \/\/   /|   | |    __)  |   |
+                        \        / |   | |     \   |   |
+                         \__/\  /  |___| \___  /   |___|
+                              \/             \/         
+                                                                    
+               _____  _____     ____  _____     ____    ____ _______ 
+              /     \ \__  \   /    \ \__  \   / ___\ _/ __ \\_  __ \
+             |  Y Y  \ / __ \_|   |  \ / __ \_/ /_/  >\  ___/ |  | \/
+             |__|_|  /(____  /|___|  /(____  /\___  /  \___  >|__|   
+                   \/      \/      \/      \//_____/       \/        
+
+
+                                                            version alfalfa
+                                                            
+Connect to:
+-------------
+wm co [SSID] anon <identity type, device: mobile,laptop> <identity subtype, OS :{android, ios}, {windows, macos}>
+wm co [SSID] man [MAC ADDRESS] [HOSTNAME] [WLAN DEVICE]
+wm co [SSID]
+
+Autoconnect :
+-------------
+wm auto anon
+wm auto man  [MAC ADDRESS] [HOSTNAME] [IDENTITY TTL] [CONNECTIVITY TBC] [WLAN DEVICE]
+wm auto
+
+Scan for wifi networks:
+--------------------
+wm scan <wlan device> <phy device>
+
+Test internet connectivity:
+----------------------------
+wm test <wlan device> <phy device>
+
+- - - - - - - - - - - - - - - - - - - - -
+
+EXAMPLES:
+
+[] Connect to the net with ssid mywifi:
+    wm co mywifi
+    
+[] Connect to the net with ssid mywifi using a random identity
+    wm co mywifi anon
+    
+[] Connect to the net with ssid mywfi using a random identity simulating a mobile device
+    wm co mywfi anon mobile
+    
+[] Connect to the net with ssid mywfi using a random identity simulating a windows laptop     
+    wm co mywifi anon laptop windows
+
+[] Connect to the first available net in wifidb.csv and try to keep connection
+    wm auto
+    
+[] Connect to the first available net in wifidb.csv and try to keep connection,
+   rotating the random identity using a random time.
+    wm auto anon
+
+EOF
+)
+
+
+
+
+disable_wm(){
+    # Check for backup to avoid recleans in restart
+    #>/dev/null 2>&1
+        do_clean_all
+    if [ -d $prvcfg_pth ]; then
+        do_recover
+        rm $prvcfg_pth -r # remove backup
+    fi
+}
+
+enable_wm(){
+        do_backup
+        do_clean_all
+}
+ 
+load_wm(){
+    # Check if last execution finish cleanly
+    if [ ! -d $prvcfg_pth ]; then # load directly
+        enable_wm
+    else # reload case
+        logger -t "WM" "Dirty finish detected, doing reload."
+        disable_wm
+        enable_wm
+    fi
+    do_clean_all # TODO: Improve cleaning/loading routine, too steps
+} 
+       
+
+case $1 in # Parse task
+    [c,C]*) # Connect to
+        if [ "$2" != "" ];then # SSID is setted
+            load_wm            
+            case $3 in # Parse parameters
+                [a,A]*) #  with anonymity
+                    # wm co [SSID] anon <identity type, device: mobile,laptop> <identity subtype, OS :{android, ios}, {windows, macos}>                    
+                    if $(do_connect $2 $(get_rnd_identity $4 ));then # Check do_connect return
+                        exit 0
+                    fi
+                ;;
+                [m,M]*) #  manual conf
+                    # wm co [SSID] man [MAC ADDRESS] [HOSTNAME] [WLAN DEVICE]
+                    if $(do_connect "$2" "$4" "$5" "$6") ;then # Check do_connect return
+                        exit 0
+                    fi
+                ;;
+     
+                *) # all default
+                    # wm co [SSID]
+                    if $(do_connect $2 );then # Check do_connect return
+                        exit 0
+                    fi
+                ;;
+            esac
+        fi
+        # All other cases
+        echo "TODO: Error MSG"
+        exit 1
+    ;;
+    
+    [a,A]*) # Auto connect
+            load_wm
+            case $2 in # Parse parameters
+                [a,A]*) #  with anonymity
+                    # wm auto anon
+                    do_autoconnect $2
+                ;;
+                [m,M]*) #  manual conf
+                    # wm auto man  [MAC ADDRESS] [HOSTNAME] [IDENTITY TTL] [CONNTECTIVITY TBC] [WLAN DEVICE]
+                    do_autoconnect $2 $3 $4 $5 $6 $7 
+                ;;
+     
+                *) # all default
+                    # wm auto 
+                    do_autoconnect
+                ;;
+            esac
+    ;;
+    [e,E]*) # Enable wifi manager (clean conf and backup)
+    enable_wm
+    ;;
+    
+    [l,L]*) # Show SSID in wifidb.cvs
+    show_ssid_list
+    ;;
+    
+    [d,D]*) # Disable wifi manager (clean all and restore previous conf)
+    disable_wm
+    ;;
+    [p,P]*) # Purge all configurations and restore default conf
+    # TODO integrate correctly, create wm back --> backup [NAME]
+    
+    do_clean_all
+    rm ${prvcfg_pth} -rf
+    cp /etc/wm/previous_confs.default /etc/wm/tmp/previous_confs -r
+    if [ -d $prvcfg_pth ]; then # load directly
+    do_recover
+    fi    
+    
+    ;;    
+    [s,S]*) # Scan
+    # wm scan <wlan device> <phy device>
+    # TODO: Clean configuration on exit
+    load_wm
+    if $(do_scan $(do_conf $2 $3));then # Check scan return
+        for _ssid in $(cat $scan_rst_pth);do
+            echo "\"$(decode_ssid $_ssid)\""
+        done
+        exit 0        
+    else
+        # TODO add retry counter in do_scan               
+        echo "TODO: Error MSG scan"
+        exit 1
+    fi    
+    ;;
+    
+    [l,L]*) # Show SSID in wifidb.cvs
+    show_ssid_list
+    ;;
+    
+    [t,T]*) # Test connection
+    # wm test <wlan device> <phy device>
+    if $(has_internet $(do_conf $2 $3));then # Check has internet? return
+        # TODO add speed test             
+        echo "Internet connectivity checks completed successfully. ;)"
+        exit 0        
+    else
+        echo "Fail internet conectivity checks."
+        exit 1
+    fi    
+    ;;
+    
+    [x,X]*) # Show SSID in wifidb.cvs
+    local _ssid="test3"
+    echo "0:"$(get_encrypt $_ssid)
+    echo "1:$(get_encrypt $_ssid)"
+    echo "2:"$(get_encrypt $_ssid)
+    ;;
+    
+    *) # Show help
+    echo -e " $HELP"
+    ;;
+    
+    #TODO: # wm add [SSID] [ENCRYPTION] <KEY> <BSSID>
+    #TODO: # wm del [SSID]
+    #TODO: # wm list
+    #TODO: # wm back --> backup, TO USE TO RESTORE A SPECIFIC CONF
+esac

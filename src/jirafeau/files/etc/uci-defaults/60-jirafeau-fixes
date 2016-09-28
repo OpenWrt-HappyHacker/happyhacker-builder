@@ -1,0 +1,7 @@
+#!/bin/sh
+
+chmod 777 /tmp_php_*
+chmod 766 -R /www/storage-jirafeau@usb/
+chmod 755 -R /www/WEBtor/
+
+exit 0

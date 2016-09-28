@@ -1,0 +1,16 @@
+# Put your custom commands here that should be executed once
+# the system init finished. By default this file does nothing.
+
+mount -o remount,rw,nosuid,nodev,noatime,size=4M /tmp
+
+mkdir -p /tmp/lib/tor
+mount -t tmpfs -o rw,nosuid,nodev,noatime,size=8M,mode=0700 tmpfs /tmp/lib/tor
+chown tor:tor /tmp/lib/tor
+chmod 700 /tmp/lib/tor
+mount --bind /var/lib/tor /tmp/lib/tor
+
+chown tor:tor /etc/tor -R
+chmod 700 /etc/tor -R
+chmod 440 /etc/tor/lib/hidden_service/*/*
+
+exit 0

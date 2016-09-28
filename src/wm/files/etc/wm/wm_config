@@ -1,0 +1,27 @@
+# Default paths
+wfdb_pth='/etc/wm/wifisdb.csv' # Known wifi configuration list filepath, used in connection functions
+wdev_lst_pth='/etc/wm/tmp/dev.list' # wlan devices list filepath, used in do_setup
+scan_rst_pth='/etc/wm/tmp/scan.rst' # Scan results output filepath, used in do_scan
+prvcfg_pth='/etc/wm/tmp/previous_confs/' # Previous conf backup path, used in do_backup and do_recover
+tplcfg_pth='/etc/wm/templates/'  # UCI configuration templates path, used in do_setup
+
+# Default  configurations
+hostname_dfl='hostname' # Default hostname to do the dhcp request, used in connection functions
+macaddr_dfl='00:11:22:AA:BB:CC' # Default MAC address, used in connection functions
+useragent_dfl="Mozilla/5.0" # Default user agent, used to test connectivity
+tst_uri_dfl="random-uri" # Default uri (ex: google.com) to test connectivity, random-uri value uses randomizer library
+wdev_nm='wlan_wm' # Default wlan device name
+wphy_nm='auto' # Default physical radio device, auto for automatic selection
+
+# Default timing values
+tbc_tm_dfl="15" # Default time between internet conectivity checks in seconds
+wst_tm_dfl="16"  # Default time between waiting scans time between retries
+lnk_tmo_dfl="20" # Default Wireless link timeout in seconds, used to test connectivity
+net4_tmo_dfl="20" # Default network ipv4 timeout in seconds, used to test connectivity
+http_tmo_dfl="10" # Default http client timeout in seconds, used to test connectivity
+ping_tmo_dfl="1" # Default ping timeout in seconds, used to test connectivity
+
+# auto-anonymity parameters
+id_rnd_prm="" # Default random identity class (all,mobile,laptop, mobile android, mobile ios, laptop windows, laptop macos) used in get_rnd_identity
+ttl_prm="542 2731" # Default random range identity for TTL parameters (seconds)used in get_rnd_num
+tbc_prm="66 93" # Default random range for connectivity checks time (seconds) parameters used in get_rnd_num

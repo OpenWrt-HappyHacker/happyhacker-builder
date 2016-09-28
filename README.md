@@ -5,15 +5,19 @@ respective web pages, since distro maintainers for some distros tend to either k
 
 For example, your setup on Debian will be something like this:
 
-  sudo apt-get update
-  sudo apt-get install make vagrant virtualbox
-  make all
+```
+sudo apt-get update
+sudo apt-get install make vagrant virtualbox
+make all
+```
 
 If all went well you'll have the binaries in the "bin" directory.
 
 For more options on what else you can do with the build system, type the following command:
 
-  make help
+```
+make help
+```
 
 The build VM is configured to use 10 Gb of RAM and 4 CPU cores. You can change the number of CPUs as you see fit, but reducing the amount of RAM below 4 Gb may cause the build to 
 fail. You can also edit the configuration script (script/config.sh) to tinker with the number of Make jobs and parallel building if you want to speed up the builds - our defaults

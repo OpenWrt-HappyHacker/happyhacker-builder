@@ -1,8 +1,35 @@
+From 1cbc95e2f157fa00d05190ccab9054e65396c060 Mon Sep 17 00:00:00 2001
+From: Count Crapula <crapula@alligatorcon.pl>
+Date: Sat, 11 Feb 2017 20:14:26 +0000
+Subject: [PATCH] Add support for ZSUN WiFi SD Card Reader
+
+---
+ target/linux/ar71xx/base-files/etc/diag.sh         |   3 +
+ target/linux/ar71xx/base-files/etc/rc.button/BTN_1 |   5 +
+ .../ar71xx/base-files/etc/uci-defaults/02_network  |   1 +
+ .../etc/uci-defaults/99_zsun-enable-wifi           |   7 ++
+ target/linux/ar71xx/base-files/lib/ar71xx.sh       |   3 +
+ .../ar71xx/base-files/lib/preinit/50_failsafe_wipe |  11 +++
+ .../ar71xx/base-files/lib/upgrade/platform.sh      |   3 +-
+ target/linux/ar71xx/config-3.18                    |   1 +
+ .../files/arch/mips/ath79/mach-zsun-sdreader.c     | 101 +++++++++++++++++++++
+ target/linux/ar71xx/generic/profiles/zsun.mk       |  17 ++++
+ target/linux/ar71xx/image/Makefile                 |   8 ++
+ .../415-mtd-m25p80-add-w25q128fw.patch             |  21 +++++
+ .../610-MIPS-ath79-openwrt-machines.patch          |  22 ++++-
+ 13 files changed, 197 insertions(+), 6 deletions(-)
+ create mode 100755 target/linux/ar71xx/base-files/etc/rc.button/BTN_1
+ create mode 100644 target/linux/ar71xx/base-files/etc/uci-defaults/99_zsun-enable-wifi
+ create mode 100644 target/linux/ar71xx/base-files/lib/preinit/50_failsafe_wipe
+ create mode 100644 target/linux/ar71xx/files/arch/mips/ath79/mach-zsun-sdreader.c
+ create mode 100644 target/linux/ar71xx/generic/profiles/zsun.mk
+ create mode 100644 target/linux/ar71xx/patches-3.18/415-mtd-m25p80-add-w25q128fw.patch
+
 diff --git a/target/linux/ar71xx/base-files/etc/diag.sh b/target/linux/ar71xx/base-files/etc/diag.sh
-index 5a184cd..221b6e2 100644
+index 623e2a4..8155621 100644
 --- a/target/linux/ar71xx/base-files/etc/diag.sh
 +++ b/target/linux/ar71xx/base-files/etc/diag.sh
-@@ -354,6 +354,9 @@ get_status_led() {
+@@ -370,6 +370,9 @@ get_status_led() {
  	wlr8100)
  		status_led="sitecom:amber:status"
  		;;
@@ -24,10 +51,10 @@ index 0000000..3902df9
 +echo "0" > /sys/class/gpio/gpio18/value
 +echo "1" > /sys/class/gpio/gpio18/value
 diff --git a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
-index b2e15bb..8a0fef4 100755
+index 032c671..1460310 100755
 --- a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
 +++ b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
-@@ -368,6 +368,7 @@ tl-wr703n |\
+@@ -371,6 +371,7 @@ tl-wr703n |\
  tube2h |\
  wndap360 |\
  mynet-rext |\
@@ -50,10 +77,10 @@ index 0000000..fb4fc56
 +exit 0
 \ No newline at end of file
 diff --git a/target/linux/ar71xx/base-files/lib/ar71xx.sh b/target/linux/ar71xx/base-files/lib/ar71xx.sh
-index dab4d2c..5477799 100755
+index 1eb6999..d1e3875 100755
 --- a/target/linux/ar71xx/base-files/lib/ar71xx.sh
 +++ b/target/linux/ar71xx/base-files/lib/ar71xx.sh
-@@ -956,6 +956,9 @@ ar71xx_board_detect() {
+@@ -980,6 +980,9 @@ ar71xx_board_detect() {
  	*"HiWiFi HC6361")
  		name="hiwifi-hc6361"
  		;;
@@ -65,7 +92,7 @@ index dab4d2c..5477799 100755
  	[ -z "$AR71XX_MODEL" ] && [ "${machine:0:8}" = 'TP-LINK ' ] && \
 diff --git a/target/linux/ar71xx/base-files/lib/preinit/50_failsafe_wipe b/target/linux/ar71xx/base-files/lib/preinit/50_failsafe_wipe
 new file mode 100644
-index 0000000..bb86167
+index 0000000..b514462
 --- /dev/null
 +++ b/target/linux/ar71xx/base-files/lib/preinit/50_failsafe_wipe
 @@ -0,0 +1,11 @@
@@ -78,13 +105,14 @@ index 0000000..bb86167
 +      sleep 10
 +      reboot -f
 +}
-+
++  
 +boot_hook_add failsafe failsafe_wipe
+\ No newline at end of file
 diff --git a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-index d025632..fbde538 100755
+index fda7bc4..d3d6daa 100755
 --- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
 +++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-@@ -188,7 +188,8 @@ platform_check_image() {
+@@ -189,7 +189,8 @@ platform_check_image() {
  	mr16 | \
  	wpj558 | \
  	zcn-1523h-2 | \
@@ -95,10 +123,10 @@ index d025632..fbde538 100755
  			echo "Invalid image type."
  			return 1
 diff --git a/target/linux/ar71xx/config-3.18 b/target/linux/ar71xx/config-3.18
-index e2ff826..e3655d4 100644
+index 22faed4..a907ba7 100644
 --- a/target/linux/ar71xx/config-3.18
 +++ b/target/linux/ar71xx/config-3.18
-@@ -162,6 +162,7 @@ CONFIG_ATH79_MACH_WZR_HP_G300NH=y
+@@ -167,6 +167,7 @@ CONFIG_ATH79_MACH_WZR_HP_G300NH=y
  CONFIG_ATH79_MACH_WZR_HP_G300NH2=y
  CONFIG_ATH79_MACH_WZR_HP_G450H=y
  CONFIG_ATH79_MACH_ZCN_1523H=y
@@ -215,7 +243,7 @@ index 0000000..20d4338
 +		zsun_sdreader_setup);
 diff --git a/target/linux/ar71xx/generic/profiles/zsun.mk b/target/linux/ar71xx/generic/profiles/zsun.mk
 new file mode 100644
-index 0000000..5ff90a4
+index 0000000..8409f87
 --- /dev/null
 +++ b/target/linux/ar71xx/generic/profiles/zsun.mk
 @@ -0,0 +1,17 @@
@@ -236,8 +264,9 @@ index 0000000..5ff90a4
 +endef
 +
 +$(eval $(call Profile,ZSUNSDREADER))
+\ No newline at end of file
 diff --git a/target/linux/ar71xx/image/Makefile b/target/linux/ar71xx/image/Makefile
-index 9a7acbd..f6ca84c 100644
+index 6cbaf38..4392c6e 100644
 --- a/target/linux/ar71xx/image/Makefile
 +++ b/target/linux/ar71xx/image/Makefile
 @@ -731,6 +731,12 @@ define Device/oolite
@@ -253,7 +282,7 @@ index 9a7acbd..f6ca84c 100644
  rootfs_type=$(patsubst jffs2-%,jffs2,$(patsubst squashfs-%,squashfs,$(1)))
  
  # $(1): rootfs type.
-@@ -1060,6 +1066,7 @@ mynet_n600_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,64k(devdat
+@@ -1061,6 +1067,7 @@ mynet_n600_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,64k(devdat
  mynet_rext_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,7808k(firmware),64k(nvram)ro,64k(ART)ro
  zyx_nbg6716_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(env)ro,64k(RFdata)ro,-(nbu);ar934x-nfc:2048k(zyxel_rfsd),2048k(romd),1024k(header),2048k(kernel),-(ubi)
  qihoo_c301_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env),64k(devdata),64k(devconf),15744k(firmware),64k(warm_start),64k(action_image_config),64k(radiocfg)ro;spi0.1:15360k(upgrade2),1024k(privatedata)
@@ -261,7 +290,7 @@ index 9a7acbd..f6ca84c 100644
  
  
  define Image/BuildKernel
-@@ -1943,6 +1950,7 @@ $(eval $(call SingleProfile,AthLzma,64k,WLR8100,wlr8100,WLR8100,ttyS0,115200,$$(
+@@ -1948,6 +1955,7 @@ $(eval $(call SingleProfile,AthLzma,64k,WLR8100,wlr8100,WLR8100,ttyS0,115200,$$(
  $(eval $(call SingleProfile,AthLzma,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage,65536))
  $(eval $(call SingleProfile,AthLzma,64k,WPJ531_16M,wpj531-16M,WPJ531,ttyS0,115200,$$(wpj531_mtdlayout_16M),KRuImage,65536))
  $(eval $(call SingleProfile,AthLzma,64k,WPJ558_16M,wpj558-16M,WPJ558,ttyS0,115200,$$(wpj558_mtdlayout_16M),KRuImage,65536))
@@ -297,18 +326,18 @@ index 0000000..3a17270
 + 
 + 	/* Catalyst / On Semiconductor -- non-JEDEC */
 diff --git a/target/linux/ar71xx/patches-3.18/610-MIPS-ath79-openwrt-machines.patch b/target/linux/ar71xx/patches-3.18/610-MIPS-ath79-openwrt-machines.patch
-index d6e786d..d0e0764 100644
+index 99e96aa..a0c3779 100644
 --- a/target/linux/ar71xx/patches-3.18/610-MIPS-ath79-openwrt-machines.patch
 +++ b/target/linux/ar71xx/patches-3.18/610-MIPS-ath79-openwrt-machines.patch
 @@ -1,6 +1,6 @@
  --- a/arch/mips/ath79/machtypes.h
  +++ b/arch/mips/ath79/machtypes.h
--@@ -16,22 +16,199 @@
-+@@ -16,22 +16,200 @@
+-@@ -16,22 +16,201 @@
++@@ -16,22 +16,202 @@
   
   enum ath79_mach_type {
   	ATH79_MACH_GENERIC = 0,
-@@ -197,6 +197,7 @@
+@@ -199,6 +199,7 @@
  +	ATH79_MACH_WZR_450HP2,		/* Buffalo WZR-450HP2 */
  +	ATH79_MACH_ZCN_1523H_2,		/* Zcomax ZCN-1523H-2-xx */
  +	ATH79_MACH_ZCN_1523H_5,		/* Zcomax ZCN-1523H-5-xx */
@@ -316,16 +345,16 @@ index d6e786d..d0e0764 100644
   };
   
   #endif /* _ATH79_MACHTYPE_H */
-@@ -1361,7 +1362,7 @@
+@@ -1374,7 +1375,7 @@
   
   config ATH79_MACH_UBNT_XM
   	bool "Ubiquiti Networks XM/UniFi boards"
--@@ -83,6 +1144,106 @@ config ATH79_MACH_UBNT_XM
-+@@ -83,6 +1144,116 @@ config ATH79_MACH_UBNT_XM
+-@@ -83,6 +1155,106 @@ config ATH79_MACH_UBNT_XM
++@@ -83,6 +1165,106 @@ config ATH79_MACH_UBNT_XM
   	  Say 'Y' here if you want your kernel to support the
   	  Ubiquiti Networks XM (rev 1.0) board.
   
-@@ -1465,10 +1466,20 @@
+@@ -1478,10 +1479,20 @@
  +	select ATH79_DEV_USB
  +	select ATH79_NVRAM
  +
@@ -342,35 +371,37 @@ index d6e786d..d0e0764 100644
   endmenu
   
   config SOC_AR71XX
--@@ -124,7 +1285,10 @@ config ATH79_DEV_DSA
-+@@ -124,7 +1295,10 @@ config ATH79_DEV_DSA
+-@@ -124,7 +1296,10 @@ config ATH79_DEV_DSA
++@@ -124,7 +1306,10 @@ config ATH79_DEV_DSA
   config ATH79_DEV_ETH
   	def_bool n
   
-@@ -1480,7 +1491,7 @@
+@@ -1493,7 +1504,7 @@
   	def_bool n
   
   config ATH79_DEV_GPIO_BUTTONS
--@@ -154,6 +1318,11 @@ config ATH79_PCI_ATH9K_FIXUP
-+@@ -154,6 +1328,11 @@ config ATH79_PCI_ATH9K_FIXUP
+-@@ -154,6 +1329,11 @@ config ATH79_PCI_ATH9K_FIXUP
++@@ -154,6 +1339,11 @@ config ATH79_PCI_ATH9K_FIXUP
   	def_bool n
   
   config ATH79_ROUTERBOOT
-@@ -1494,7 +1505,7 @@
+@@ -1507,7 +1518,7 @@
   endif
  --- a/arch/mips/ath79/Makefile
  +++ b/arch/mips/ath79/Makefile
--@@ -38,9 +38,128 @@ obj-$(CONFIG_ATH79_ROUTERBOOT)		+= route
-+@@ -38,9 +38,130 @@ obj-$(CONFIG_ATH79_ROUTERBOOT)		+= route
+-@@ -38,9 +38,129 @@ obj-$(CONFIG_ATH79_ROUTERBOOT)		+= route
++@@ -38,9 +38,131 @@ obj-$(CONFIG_ATH79_ROUTERBOOT)		+= route
   #
   # Machines
   #
-@@ -1623,6 +1634,8 @@
+@@ -1637,6 +1648,7 @@
  +obj-$(CONFIG_ATH79_MACH_ZCN_1523H)	+= mach-zcn-1523h.o
  +obj-$(CONFIG_ATH79_MACH_CARAMBOLA2)	+= mach-carambola2.o
  +obj-$(CONFIG_ATH79_MACH_NBG6716)	+= mach-nbg6716.o
 ++obj-$(CONFIG_ATH79_MACH_ZSUN_SDREADER)	+= mach-zsun-sdreader.o
-++
  --- a/arch/mips/ath79/prom.c
  +++ b/arch/mips/ath79/prom.c
  @@ -180,6 +180,12 @@ void __init prom_init(void)
+-- 
+1.9.1
+

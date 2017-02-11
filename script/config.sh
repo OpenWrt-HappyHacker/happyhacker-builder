@@ -8,12 +8,16 @@
 # Build VM settings.
 #------------------------------------------------------------------------------#
 
+# Set the virtualization/container provider.
+# Valid values are "docker" and "virtualbox".
+VIRT_PROVIDER="virtualbox"
+
 # Number of CPU cores to give to the build VM.
-NUM_CORES=6
+NUM_CORES=2
 
 # Amount of RAM in megabytes to give to the build VM.
 # We recommend AT LEAST 4 gigabytes.
-VM_MEMORY=12888
+VM_MEMORY=4096
 
 #------------------------------------------------------------------------------#
 # Build settings.

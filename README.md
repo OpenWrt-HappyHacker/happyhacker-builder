@@ -1,4 +1,4 @@
-This is a Vagrant setup to build OpenWrt Happy Hacker firmware images.
+This is the build system for OpenWrt Happy Hacker firmware images.
 
 You'll need a Linux machine (any distro is fine), an active Internet connection. Everything is built inside a sandbox, to better take care of dependencies and
 remove OS quirks. We support using either Vagrant and VirtualBox, or Docker containers. We use Vagrant for building locally in our laptops and Docker for our

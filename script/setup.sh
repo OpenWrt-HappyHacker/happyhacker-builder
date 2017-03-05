@@ -1,12 +1,17 @@
 #!/bin/bash
+set -e
+
+
+cd /home/vagrant/
 
 # Load the build configuration variables.
 source /vagrant/script/config.sh
 
 # Enable colors in the console.
-sed -i s/\\#force_color_prompt\\=yes/force_color_prompt=yes/ .bashrc
-
-# Clone the OpenWRT source code.
+if [ -e ".bashrc" ]; then
+    sed -i s/\\#force_color_prompt\\=yes/force_color_prompt=yes/ .bashrc
+fi
+# Clone the OpenWrt source code.
 SOURCE_DIR="openwrt"
 cd ~
 if [ -e "${SOURCE_DIR}" ]
@@ -31,3 +36,4 @@ cd ..
 
 # Delete the source code now. On each build it will be extracted from the tarfile.
 rm -fr -- "${SOURCE_DIR}"
+

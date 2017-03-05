@@ -11,7 +11,7 @@
 #
 #   bin/{target}/*                      This is where the output files will be written
 #
-#   config/{target}/config              OpenWRT makefile configuration, this is mandatory
+#   config/{target}/config              OpenWrt makefile configuration, this is mandatory
 #   config/{target}/diffconfig          Differential configuration file, only used if config is missing
 #   config/{target}/sources             List of components to be included in this target
 #   config/{target}/patches             List of patches to be applied on this target
@@ -24,15 +24,15 @@
 #   src/{component}/initialize.sh       Initialization script for this component
 #   src/{component}/finish.sh           Post build customization script for this component
 #
-#   patches/{patch}.diff                Diff-style patch for the OpenWRT source code to be applied
+#   patches/{patch}.diff                Diff-style patch for the OpenWrt source code to be applied
 #
-# The build script will begin by copying the OpenWRT makefile configuration into the VM. Then the sources file is parsed to get the list of components. For
+# The build script will begin by copying the OpenWrt makefile configuration into the VM. Then the sources file is parsed to get the list of components. For
 # each component, its files are copied into the VM as well to be included in the device filesystem. The order of the files is the same as the order in the
 # list of sources (this is important because if a file already exists, it will be overwritten). After that, the files meant to be included for the target are
 # copied as well.
 #
-# After copying all the files, the patches are applied in the order specified by the patches file. This can come in handy when you need to modify the OpenWRT
-# kernel to support specific hardware, or patch a bug that was not yet included in the OpenWRT official sources.
+# After copying all the files, the patches are applied in the order specified by the patches file. This can come in handy when you need to modify the OpenWrt
+# kernel to support specific hardware, or patch a bug that was not yet included in the OpenWrt official sources.
 #
 # When all patching is done, the scripts are run - first the initialization script for each component (again, in order) and finally the script for the target
 # itself. The point of the initialization scripts is to make changes to the files that for some reason may not be just included in the directory - for example,
@@ -41,7 +41,7 @@
 #
 # Note that the copying of files, applying of patches and execution of scripts happen only for new builds. If you do a rebuild instead, none of this happens.
 #
-# After the scripts are run, OpenWRT is compiled, and the target image files are placed in the bin directory. When the compilation is finished, the finish
+# After the scripts are run, OpenWrt is compiled, and the target image files are placed in the bin directory. When the compilation is finished, the finish
 # scripts are run - first the ones defined for each component (as always, in order) and finally the one for the target. The purpose of the finish scripts is
 # to customize the image files after compilation is done - for example you could generate secure hashes or do a cryptographic signature here. These scripts are
 # run regardless of whether it's a new build or a rebuild.
@@ -104,7 +104,7 @@ esac
 >&2 echo "BUILDING FIRMWARE IMAGE FOR TARGET: $1"
 >&2 echo "---------------------------------------------------------------------"
 
-# Get the OpenWRT source code.
+# Get the OpenWrt source code.
 SOURCE_DIR="$1"
 cd ~
 if [ -e "${SOURCE_DIR}" ]
@@ -147,7 +147,7 @@ then
     cp -rvT "/vagrant/config/$1/files/" ./files/
 fi
 
-# Apply the OpenWRT patches.
+# Apply the OpenWrt patches.
 if [ -e "/vagrant/config/$1/patches" ]
 then
     while read p
@@ -186,7 +186,7 @@ then
 fi
 
 # If it was a full configuration file, fix the makefile if it was generated
-# using an older version of OpenWRT. If it was a differential configuration
+# using an older version of OpenWrt. If it was a differential configuration
 # file, convert it to a full configuration file.
 if [ -e "/vagrant/config/$1/config" ]
 then
@@ -195,7 +195,7 @@ else
     make defconfig
 fi
 
-# Build OpenWRT.
+# Build OpenWrt.
 if (( ${VERBOSE} == 0 ))
 then
     make -j${MAKE_JOBS}
@@ -255,3 +255,4 @@ TIMESTAMP_END=$(date +%s.%N)
 DELTA_TIME=$(echo "${TIMESTAMP_END} - ${TIMESTAMP_START}" | bc)
 DELTA_TIME_FORMATTED=$(date -u -d @0${DELTA_TIME} +"%T")
 >&2 echo "Build time: ${DELTA_TIME_FORMATTED} (${DELTA_TIME} seconds)."
+

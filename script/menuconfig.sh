@@ -12,10 +12,15 @@ if (( $# == 0 ))
 then
     SOURCE_DIR="openwrt-devel"
 else
-    SOURCE_DIR=`basename "$1"`
+    if [[ -z "$1" ]]
+    then
+        SOURCE_DIR="openwrt-devel"
+    else
+        SOURCE_DIR=`basename "$1"`
+    fi
 fi
 
-# Get the OpenWRT source code.
+# Get the OpenWrt source code.
 cd ~
 if [ -e "${SOURCE_DIR}" ]
 then
@@ -38,7 +43,7 @@ else
     fi
 fi
 
-# Apply the OpenWRT patches.
+# Apply the OpenWrt patches.
 PATCHES="/vagrant/config/${SOURCE_DIR}/patches"
 if [ -e "${PATCHES}" ]
 then
@@ -66,3 +71,4 @@ make menuconfig
 mkdir -p "/vagrant/config/${SOURCE_DIR}"
 cp .config "${CONFIG_FILE}"
 ./scripts/diffconfig.sh > "${DIFF_CONFIG_FILE}"
+

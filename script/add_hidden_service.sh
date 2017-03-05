@@ -48,3 +48,4 @@ fi
 
 # Tell the user about it.
 echo "Added new Tor hidden service on port $2."
+

@@ -1,5 +1,5 @@
 #
-# OpenWRT Happy Hacker edition makefile
+# OpenWrt Happy Hacker edition makefile
 #
 
 .SILENT:
@@ -11,10 +11,10 @@ TARGETS := $(shell script/list_targets.sh)
 # The first target is the default target.
 # We don't want to build everything by default, we want to show the help instead.
 help:
-	script/help.sh
+	script/make_help.sh
 
 list:
-	script/show_targets.sh
+	script/make_list.sh
 
 .targets: ${TARGETS}
 
@@ -23,22 +23,23 @@ all:
 	make -j1 suspend
 
 up:
-	vagrant up
+	script/make_up.sh
 
 suspend:
-	vagrant suspend
+	script/make_suspend.sh
 
 destroy:
-	vagrant destroy
+	script/make_destroy.sh
 
 bin/%: up
-	vagrant ssh -c "/vagrant/script/build.sh \"$(notdir $@)\""
+	script/make_target.sh \"$(notdir $@)\"
 
-menuconfig:
-	vagrant ssh -c "/vagrant/script/menuconfig.sh \"$(CONFIG)\""
+menuconfig: up
+	script/make_menuconfig.sh \"$(CONFIG)\"
 
 clean:
 	rm -fr ./bin/*
 	git checkout -- bin/
 
 dirclean: clean destroy
+

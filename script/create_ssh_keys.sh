@@ -40,3 +40,4 @@ chmod 444 "./files/root/${SSH_KEYFILE}.pub"
 mkdir -p ./files/etc/dropbear/
 cat "./files/root/${SSH_KEYFILE}.pub" >> ./files/etc/dropbear/authorized_keys
 chmod 600 ./files/etc/dropbear/authorized_keys
+

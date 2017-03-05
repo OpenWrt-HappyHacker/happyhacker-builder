@@ -1,1 +1,1 @@
-This is where each OpenWRT patch is defined. For more details see: script/build.sh
+This is where each OpenWrt patch is defined. For more details see: script/build.sh

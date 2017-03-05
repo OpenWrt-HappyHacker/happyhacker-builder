@@ -8,16 +8,30 @@
 # Build VM settings.
 #------------------------------------------------------------------------------#
 
-# Set the virtualization/container provider.
-# Valid values are "docker" and "virtualbox".
+# Set the sandbox (virtualization/container) provider.
+# Valid values are "docker" and "vagrant".
+SANDBOX_PROVIDER="vagrant"
+
+# When using Vagrant, set the virtualization provider.
+# Only VirtualBox was tested.
+# This setting is ignored when using Docker.
 VIRT_PROVIDER="virtualbox"
 
 # Number of CPU cores to give to the build VM.
-NUM_CORES=2
+# One core is more conservative and easier to debug, but slower.
+# We recommend using 4 cores for quicker builds.
+# See also the MAKE_JOBS setting.
+NUM_CORES=1
 
 # Amount of RAM in megabytes to give to the build VM.
-# We recommend AT LEAST 4 gigabytes.
+# Will not work without AT LEAST 4 gigabytes.
+# This setting is ignored when using Docker.
 VM_MEMORY=4096
+
+# Container settings when using Docker.
+# This is ignored when using Vagrant.
+CNT_TP="happyhacker/openwrtbuilder:0.1"
+CNT_NM="hh-builder"
 
 #------------------------------------------------------------------------------#
 # Build settings.
@@ -32,7 +46,7 @@ VM_MEMORY=4096
 # Turn verbose mode on (1) or off (0). Implies MAKE_JOBS=1.
 VERBOSE=0
 
-# Cache where the original, unmodified OpenWRT source code will be kept.
+# Cache where the original, unmodified OpenWrt source code will be kept.
 # Normally you never need to change this.
 TAR_FILE="openwrt.tar.bz2"
 
@@ -86,10 +100,10 @@ SSH_TYPE="rsa"
 SSH_KEYFILE="id_rsa"
 
 #------------------------------------------------------------------------------#
-# OpenWRT source code location.
+# OpenWrt source code location.
 #------------------------------------------------------------------------------#
 
-# OpenWRT 15.05 Chaos Calmer. This is the one we support.
+# OpenWrt 15.05 Chaos Calmer. This is the one we support.
 REPO_URL="https://git.openwrt.org/15.05/openwrt.git"
 
 # Bleeding edge version. This is experimental, and won't work out of the box.
@@ -99,3 +113,4 @@ REPO_URL="https://git.openwrt.org/15.05/openwrt.git"
 # Not recommended - it was based on an older branch of Chaos Calmer.
 # We left it here only for testing.
 #REPO_URL="https://github.com/Emeryth/openwrt-zsun.git"
+

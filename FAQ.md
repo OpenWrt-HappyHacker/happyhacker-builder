@@ -25,7 +25,7 @@ We are preparing a complete tutorial to be uploaded here, but in the meantime do
 
 Most of the times, when compilation fails it's because OpenWrt downloads a lot of crap off the Internet during the build. Some of that stuff is hosted in Sourceforge and other less-than-ideal sites, so downloads frequently fail. We are working on a fix for that, possibly by pre-downloading everything and creating a local cache.
 
-The second most common reason for builds to fail is if you modified the configuration to give the build system less than 4 Gb of RAM, or if you are creating your own custom image (in which case, if you select too many OpenWrt packages you may run out of space in ROM). The second problem will be fixed in the near future, we want to make OpenWrt boot from the MiccroSD card directly instead of using ROM.
+The second most common reason for builds to fail is if you modified the configuration to give the build system less than 4 Gb of RAM, or if you are creating your own custom image (in which case, if you select too many OpenWrt packages you may run out of space in ROM). The second problem will be fixed in the near future, we want to make OpenWrt boot from the MicroSD card directly instead of using ROM.
 
 In the event of any other problems compiling the code, let us know! Open a new issue in Github or email us at: crapula@alligatorcon.pl
 

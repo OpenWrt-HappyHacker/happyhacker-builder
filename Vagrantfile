@@ -2,6 +2,7 @@
 # vi: set ft=ruby :
 load File.join(File.dirname(__FILE__), "script", "config.sh")
 ENV['VAGRANT_DEFAULT_PROVIDER'] = VIRT_PROVIDER
+ENV['LC_ALL']="en_US.UTF-8"
 Vagrant.configure(2) do |config|
   config.vm.define "openwrt-happyhacker-build-vm"
   config.vm.box = "ubuntu/trusty64"

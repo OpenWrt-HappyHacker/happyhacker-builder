@@ -199,10 +199,26 @@ fi
 if (( ${VERBOSE} == 0 ))
 then
     echo "Building in ${MAKE_JOBS} threads"
-    make -j${MAKE_JOBS}
+    if [ -z "${MAKE_RETRY}" ]
+        make -j${MAKE_JOBS}
+    then
+        until [ $MAKE_RETRY -lt 1 ] || make -j${MAKE_JOBS}
+        do
+            let MAKE_RETRY--
+            echo "Build failed! Retrying..."
+        done
+    fi
 else
     echo "Parallel building disabled."
-    make -j1 V=s
+    if [ -z "${MAKE_RETRY}" ]
+        make -j${MAKE_JOBS}
+    then
+        until [ $MAKE_RETRY -lt 1 ] || make -j1 V=s
+        do
+            let MAKE_RETRY--
+            echo "Build failed! Retrying..."
+        done
+    fi
 fi
 
 # Run the after build scripts for each component.

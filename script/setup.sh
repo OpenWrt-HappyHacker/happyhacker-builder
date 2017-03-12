@@ -19,7 +19,7 @@ if [ -e "${SOURCE_DIR}" ]
 then
     rm -fr -- "${SOURCE_DIR}"
 fi
-git clone "${REPO_URL}" "${SOURCE_DIR}" 2>&1
+git clone --progress "${REPO_URL}" "${SOURCE_DIR}" 2>&1
 cd "${SOURCE_DIR}"
 
 # If a code freeze is requested, go to that commit.

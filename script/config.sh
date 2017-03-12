@@ -21,7 +21,7 @@ VIRT_PROVIDER="virtualbox"
 # One core is more conservative and easier to debug, but slower.
 # We recommend using 4 cores for quicker builds.
 # See also the MAKE_JOBS setting.
-NUM_CORES=1
+NUM_CORES=4
 
 # Amount of RAM in megabytes to give to the build VM.
 # Will not work without AT LEAST 4 gigabytes.
@@ -45,6 +45,11 @@ CNT_NM="hh-builder"
 
 # Turn verbose mode on (1) or off (0). Implies MAKE_JOBS=1.
 VERBOSE=0
+
+# Number of retries if the build fails.
+# This is needed because OpenWrt compilation is surprisingly unstable.
+# Comment out this line to prevent this behavior.
+MAKE_RETRY=3
 
 # Cache where the original, unmodified OpenWrt source code will be kept.
 # Normally you never need to change this.
@@ -105,6 +110,10 @@ SSH_KEYFILE="id_rsa"
 
 # OpenWrt 15.05 Chaos Calmer. This is the one we support.
 REPO_URL="https://git.openwrt.org/15.05/openwrt.git"
+
+# LEDE source repository.
+# LEDE is a fork of OpenWrt focused on stability and security.
+#REPO_URL="https://git.lede-project.org/source.git"
 
 # Optionally use a specific commit. This freezes the code to the point we want,
 # so further upstream commits don't break our patches.

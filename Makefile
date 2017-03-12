@@ -37,6 +37,9 @@ bin/%: up
 menuconfig: up
 	script/make_menuconfig.sh \"$(CONFIG)\"
 
+ssh: up
+	script/make_ssh.sh
+
 clean:
 	rm -fr ./bin/*
 	git checkout -- bin/

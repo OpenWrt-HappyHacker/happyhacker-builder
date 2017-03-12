@@ -20,21 +20,26 @@ vagrant)
 # When using Docker.
 docker)
 
-  # TODO: Dynamics volumen share source, now it's static /DinD/vagrant-happyhacker
-  # TODO: Clean status eror when container is not created
-  # TODO: When finish scripts modifications, uncomment next line breaks cache image and rebuild it everytime
+  # Fix the SSH key permissions, because Git does not preserve them.
+  chmod 400 -- ./script/builder-keys/*
 
-  # If not it's running, run it
-  status=$(docker inspect --format='{{ .State.Status }}' $CNT_NM)
-  if ! [ "$status" == "running"  ]; then
-  docker run  --privileged \
-            -e "container=docker" \
-            -e "TERM=xterm-256color" \
-            -p 22222:22 \
-            --hostname $CNT_NM \
-            --name $CNT_NM \
-            -v /DinD/vagrant-happyhacker:/vagrant \
-            -d $CNT_TP
+  # Create the base image if it doesn't exist.
+  if [[ "$(docker images -q $CNT_TP 2> /dev/null)" == "" ]]
+  then
+    docker build -t $CNT_TP .
+  fi
+
+  # If not it's running, run it.
+  if [ ! "$(docker ps -q -f name=${CNT_NM})" ] || [ ! "$(docker ps -aq -f status=running -f name=${CNT_NM})" ]
+  then
+    docker run --privileged \
+               -e "container=docker" \
+               -e "TERM=xterm-256color" \
+               -p 22222:22 \
+               --hostname $CNT_NM \
+               --name $CNT_NM \
+               -v /DinD/vagrant-happyhacker:/vagrant \
+               -d $CNT_TP
   fi
 
   ;;

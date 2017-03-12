@@ -12,7 +12,8 @@ To build a specific target:
 To clean the build files (but not the VM or output files):
     make clean
 
-To completely clean up everything (including the VM and output files):
+To completely clean up everything
+(including the container/VM and output files):
     make dirclean
 
 To begin preparing a new firmware image from scratch:
@@ -20,6 +21,9 @@ To begin preparing a new firmware image from scratch:
 
 To modify the configuration for an existing target firmware image:
     make menuconfig CONFIG=<target>
+
+To quickly SSH into the build contianer/VM:
+    make ssh
 
 Vagrant VM control:
     make up

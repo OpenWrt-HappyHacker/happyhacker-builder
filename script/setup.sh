@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-
+# Needed in some scenarios. Doesn't hurt when not needed.
 cd /home/vagrant/
 
 # Load the build configuration variables.
@@ -11,6 +11,7 @@ source /vagrant/script/config.sh
 if [ -e ".bashrc" ]; then
     sed -i s/\\#force_color_prompt\\=yes/force_color_prompt=yes/ .bashrc
 fi
+
 # Clone the OpenWrt source code.
 SOURCE_DIR="openwrt"
 cd ~
@@ -20,6 +21,15 @@ then
 fi
 git clone "${REPO_URL}" "${SOURCE_DIR}" 2>&1
 cd "${SOURCE_DIR}"
+
+# If a code freeze is requested, go to that commit.
+if [ -z ${REPO_COMMIT+x} ]
+then
+    echo "Using latest commit."
+else
+    echo "Freezing code to commit: ${REPO_COMMIT}"
+    git reset --hard "${REPO_COMMIT}"
+fi
 
 # Download and install the feeds.
 ./scripts/feeds update -a 2>&1

@@ -106,11 +106,7 @@ SSH_KEYFILE="id_rsa"
 # OpenWrt 15.05 Chaos Calmer. This is the one we support.
 REPO_URL="https://git.openwrt.org/15.05/openwrt.git"
 
-# Bleeding edge version. This is experimental, and won't work out of the box.
-#REPO_URL="https://git.openwrt.org/openwrt.git"
-
-# Specific ZSUN version we were using in the beginning.
-# Not recommended - it was based on an older branch of Chaos Calmer.
-# We left it here only for testing.
-#REPO_URL="https://github.com/Emeryth/openwrt-zsun.git"
-
+# Optionally use a specific commit. This freezes the code to the point we want,
+# so further upstream commits don't break our patches.
+# Comment out this line to always use the latest commit (not recommended!).
+REPO_COMMIT="e52d305bff85e05a742911522303a47d98c321d8"

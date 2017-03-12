@@ -109,4 +109,4 @@ REPO_URL="https://git.openwrt.org/15.05/openwrt.git"
 # Optionally use a specific commit. This freezes the code to the point we want,
 # so further upstream commits don't break our patches.
 # Comment out this line to always use the latest commit (not recommended!).
-REPO_COMMIT="e52d305bff85e05a742911522303a47d98c321d8"
+REPO_COMMIT="9a1fd3e313cedf1e689f6f4e342528ed27c09766"

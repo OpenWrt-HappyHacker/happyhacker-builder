@@ -198,8 +198,10 @@ fi
 # Build OpenWrt.
 if (( ${VERBOSE} == 0 ))
 then
+    echo "Building in ${MAKE_JOBS} threads"
     make -j${MAKE_JOBS}
 else
+    echo "Parallel building disabled."
     make -j1 V=s
 fi
 
@@ -230,11 +232,13 @@ then
     then
         cp -r logs/ "/vagrant/bin/$1/"
     fi
+    cp .config "/vagrant/bin/$1/config"
     >&2 echo "Build successful, output files stored in: bin/$1"
 else
+    mkdir -p "/vagrant/bin/$1/"
+    cp .config "/vagrant/bin/$1/config"
     if [ -e logs/ ]
     then
-        mkdir -p "/vagrant/bin/$1/"
         cp -r logs/ "/vagrant/bin/$1/"
         >&2 echo "Build FAILED, log files stored in: bin/$1/logs"
     else

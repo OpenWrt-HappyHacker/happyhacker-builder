@@ -350,7 +350,7 @@ index 99e96aa..a0c3779 100644
   config ATH79_MACH_UBNT_XM
   	bool "Ubiquiti Networks XM/UniFi boards"
 -@@ -83,6 +1155,106 @@ config ATH79_MACH_UBNT_XM
-+@@ -83,6 +1165,106 @@ config ATH79_MACH_UBNT_XM
++@@ -83,6 +1156,116 @@ config ATH79_MACH_UBNT_XM
   	  Say 'Y' here if you want your kernel to support the
   	  Ubiquiti Networks XM (rev 1.0) board.
   
@@ -394,11 +394,12 @@ index 99e96aa..a0c3779 100644
   #
   # Machines
   #
-@@ -1637,6 +1648,7 @@
+@@ -1637,6 +1648,8 @@
  +obj-$(CONFIG_ATH79_MACH_ZCN_1523H)	+= mach-zcn-1523h.o
  +obj-$(CONFIG_ATH79_MACH_CARAMBOLA2)	+= mach-carambola2.o
  +obj-$(CONFIG_ATH79_MACH_NBG6716)	+= mach-nbg6716.o
 ++obj-$(CONFIG_ATH79_MACH_ZSUN_SDREADER)	+= mach-zsun-sdreader.o
+++
  --- a/arch/mips/ath79/prom.c
  +++ b/arch/mips/ath79/prom.c
  @@ -180,6 +180,12 @@ void __init prom_init(void)

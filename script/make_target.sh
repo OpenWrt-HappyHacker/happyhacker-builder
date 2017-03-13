@@ -17,6 +17,14 @@ vagrant)
 
 # When using Docker.
 docker)
+
+  # Make sure the write permissions for the container are correct.
+  # ./script must be written to as it contains the CA keys.
+  # ./bin will contain the build output.
+  chmod 777 ./script
+  chmod 777 ./bin
+  chmod 777 $(find ./bin -type d)
+
   # TODO: race condition here. Tor provisioning should be done when starting the container, not each build.
   ssh -oStrictHostKeyChecking=no vagrant@127.0.0.1 -p 22222 -i ./script/builder-keys/ssh.priv /vagrant/script/prov-tor.sh
   ssh -oStrictHostKeyChecking=no vagrant@127.0.0.1 -p 22222 -i ./script/builder-keys/ssh.priv /vagrant/script/build.sh \"$1\"

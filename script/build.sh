@@ -221,45 +221,56 @@ else
     fi
 fi
 
+# Copy the output and logs to the vagrant synced directory.
+# This is done before the finalization scripts to simplify things.
+# However, if the finalization scripts fail we may have deleted a
+# previous successful build... but this is an acceptable edge case.
+OUTPUT_DIR="/vagrant/bin/$1"
+if [ -e bin ] && [ $(find bin/ -maxdepth 1 -type d -printf 1 | wc -m) -eq 2 ]
+then
+    rm -fr -- "${OUTPUT_DIR}/"
+    cp -r bin/*/ "${OUTPUT_DIR}/"
+    if [ -e logs/ ]
+    then
+        cp -r logs/ "${OUTPUT_DIR}/"
+    fi
+    cp .config "${OUTPUT_DIR}/config"
+    >&2 echo "Build successful, output files stored in: bin/$1"
+    BUILD_SUCCESS=1
+else
+    mkdir -p "${OUTPUT_DIR}/"
+    cp .config "${OUTPUT_DIR}/config"
+    if [ -e logs/ ]
+    then
+        rm -fr -- "${OUTPUT_DIR}/logs/"
+        cp -r logs/ "${OUTPUT_DIR}/"
+        >&2 echo "Build FAILED, log files stored in: bin/$1/logs"
+    else
+        >&2 echo "Build FAILED, no log files found either"
+    fi
+    BUILD_SUCCESS=0
+fi
+
 # Run the after build scripts for each component.
+# The BUILD_SUCCESS variable is 0 for false, 1 for true.
+# The OUTPUT_DIR variable has the pathname of the output directory.
 if [ -e "/vagrant/config/$1/sources" ]
 then
     while read src
     do
-        if [ -e "/vagrant/src/$src/finish.sh" ]
+        if [ -e "/vagrant/src/$src/finalize.sh" ]
         then
-            source "/vagrant/src/$src/finish.sh"
+            source "/vagrant/src/$src/finalize.sh"
         fi
     done < "/vagrant/config/$1/sources"
 fi
 
 # Run the after build script for this target.
-if [ -e "/vagrant/config/$1/finish.sh" ]
+# The BUILD_SUCCESS variable is 0 for false, 1 for true.
+# The OUTPUT_DIR variable has the pathname of the output directory.
+if [ -e "/vagrant/config/$1/finalize.sh" ]
 then
-    source "/vagrant/config/$1/finish.sh"
-fi
-
-# Copy the output and logs to the vagrant synced directory.
-if [ -e bin ] && [ $(find bin/ -maxdepth 1 -type d -printf 1 | wc -m) -eq 2 ]
-then
-    rm -fr -- "/vagrant/bin/$1/"
-    cp -r bin/*/ "/vagrant/bin/$1/"
-    if [ -e logs/ ]
-    then
-        cp -r logs/ "/vagrant/bin/$1/"
-    fi
-    cp .config "/vagrant/bin/$1/config"
-    >&2 echo "Build successful, output files stored in: bin/$1"
-else
-    mkdir -p "/vagrant/bin/$1/"
-    cp .config "/vagrant/bin/$1/config"
-    if [ -e logs/ ]
-    then
-        cp -r logs/ "/vagrant/bin/$1/"
-        >&2 echo "Build FAILED, log files stored in: bin/$1/logs"
-    else
-        >&2 echo "Build FAILED, no log files found either"
-    fi
+    source "/vagrant/config/$1/finalize.sh"
 fi
 
 # If and only if the build was successfuly up to this point,
@@ -275,4 +286,3 @@ TIMESTAMP_END=$(date +%s.%N)
 DELTA_TIME=$(echo "${TIMESTAMP_END} - ${TIMESTAMP_START}" | bc)
 DELTA_TIME_FORMATTED=$(date -u -d @0${DELTA_TIME} +"%T")
 >&2 echo "Build time: ${DELTA_TIME_FORMATTED} (${DELTA_TIME} seconds)."
-

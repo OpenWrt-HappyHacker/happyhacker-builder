@@ -41,8 +41,6 @@ ssh: up
 	script/make_ssh.sh
 
 clean:
-	rm -fr ./bin/*
-	git checkout -- bin/
+	script/make_clean.sh
 
 dirclean: clean destroy
-

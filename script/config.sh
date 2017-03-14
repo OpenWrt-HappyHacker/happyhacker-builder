@@ -46,11 +46,6 @@ CNT_NM="hh-builder"
 # Turn verbose mode on (1) or off (0). Implies MAKE_JOBS=1.
 VERBOSE=0
 
-# Number of retries if the build fails.
-# This is needed because OpenWrt compilation is surprisingly unstable.
-# Comment out this line to prevent this behavior.
-MAKE_RETRY=3
-
 # Cache where the original, unmodified OpenWrt source code will be kept.
 # Normally you never need to change this.
 TAR_FILE="openwrt.tar.bz2"

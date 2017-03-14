@@ -198,27 +198,9 @@ fi
 # Build OpenWrt.
 if (( ${VERBOSE} == 0 ))
 then
-    echo "Building in ${MAKE_JOBS} threads"
-    if [ -z "${MAKE_RETRY}" ]
-        make -j${MAKE_JOBS}
-    then
-        until [ $MAKE_RETRY -lt 1 ] || make -j${MAKE_JOBS}
-        do
-            let MAKE_RETRY--
-            echo "Build failed! Retrying..."
-        done
-    fi
+    make -j${MAKE_JOBS}
 else
-    echo "Parallel building disabled."
-    if [ -z "${MAKE_RETRY}" ]
-        make -j${MAKE_JOBS}
-    then
-        until [ $MAKE_RETRY -lt 1 ] || make -j1 V=s
-        do
-            let MAKE_RETRY--
-            echo "Build failed! Retrying..."
-        done
-    fi
+    make -j1 V=s
 fi
 
 # Copy the output and logs to the vagrant synced directory.

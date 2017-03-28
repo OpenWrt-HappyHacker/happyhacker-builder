@@ -33,8 +33,8 @@ with the number of Make jobs and parallel building if you want to speed up the b
 Note that the build system requires an active Internet connection, not only during provisioning of the VM but during the compilation process itself. Also, the
 build system was only tested against GNU Make, we do not know how well it would work on other versions of Make, if at all.
 
-Regarding multibuilds: currently we have very, very limited support for this. When using Vagrant you can get away with building two different targets in
-parallel, bot not the same target. With Docker it will not work at all. We may add support for this in the future but for now, just one build at a time.
+Regarding multibuilds: currently we have very, very limited support for this. When using Vagrant you can get away with building two different profiles in
+parallel, bot not the same profile. With Docker it will not work at all. We may add support for this in the future but for now, just one build at a time.
 
 Happy hacking!
 

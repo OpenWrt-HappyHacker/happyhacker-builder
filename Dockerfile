@@ -86,9 +86,14 @@ RUN \
   apt-get install -y --no-install-recommends openssh-server sudo
 
 # Provisioning scripts and custom ssh keys
-RUN mkdir -p /vagrant/script/builder-keys
+RUN mkdir -p /vagrant/script/data/builder-keys
+RUN mkdir -p /vagrant/script/guest
+RUN mkdir -p /vagrant/script/host
 COPY ./script/* /vagrant/script/
-COPY ./script/builder-keys/* /vagrant/script/builder-keys/
+COPY ./script/data/* /vagrant/script/data/
+COPY ./script/data/builder-keys/* /vagrant/script/data/builder-keys/
+COPY ./script/guest/* /vagrant/script/guest/
+COPY ./script/host/* /vagrant/script/host/
 RUN touch /vagrant/building
 
 # Vagrant user and ssh key
@@ -103,7 +108,7 @@ RUN \
   install -m 700 -o vagrant -g vagrant -d /home/vagrant/.ssh && \
   #curl -sL https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub >> /home/vagrant/.ssh/authorized_keys &&\
   #echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key' > /home/vagrant/.ssh/authorized_keys \
-  echo "$(cat /vagrant/script/builder-keys/ssh.pub)" > /home/vagrant/.ssh/authorized_keys \
+  echo "$(cat /vagrant/script/data/builder-keys/ssh.pub)" > /home/vagrant/.ssh/authorized_keys \
   chmod 600 /home/vagrant/.ssh/authorized_keys && \
   chown vagrant:vagrant /home/vagrant/.ssh/authorized_keys && \
 
@@ -127,7 +132,7 @@ RUN \
   rm /usr/sbin/policy-rc.d
 
 # Openwrt and happyhacker build dependencies
-RUN /vagrant/script/provision.sh
+RUN /vagrant/script/guest/provision.sh
 
 RUN rm /vagrant -rf
 

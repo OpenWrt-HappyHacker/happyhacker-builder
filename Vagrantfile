@@ -10,7 +10,7 @@ Vagrant.configure(2) do |config|
     vb.memory = VM_MEMORY
     vb.cpus = NUM_CORES
   end
-  config.vm.provision :shell, :inline => "/vagrant/script/provision.sh"
+  config.vm.provision :shell, :inline => "/vagrant/script/guest/vagrant_provision.sh"
   config.vm.box_check_update = false
 end
 

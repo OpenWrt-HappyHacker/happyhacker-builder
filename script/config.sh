@@ -26,7 +26,7 @@ NUM_CORES=4
 # Amount of RAM in megabytes to give to the build VM.
 # Will not work without AT LEAST 4 gigabytes.
 # This setting is ignored when using Docker.
-VM_MEMORY=4096
+VM_MEMORY=8192
 
 # Container settings when using Docker.
 # This is ignored when using Vagrant.
@@ -46,6 +46,11 @@ CNT_NM="hh-builder"
 # Turn verbose mode on (1) or off (0). Implies MAKE_JOBS=1.
 VERBOSE=0
 
+# Number of retries if the build fails.
+# This is needed because OpenWrt compilation is surprisingly unstable.
+# Comment out this line to prevent this behavior.
+#MAKE_RETRY=3
+
 # Cache where the original, unmodified OpenWrt source code will be kept.
 # Normally you never need to change this.
 TAR_FILE="openwrt.tar.bz2"
@@ -53,11 +58,6 @@ TAR_FILE="openwrt.tar.bz2"
 #------------------------------------------------------------------------------#
 # SSL/TLS certificate settings.
 #------------------------------------------------------------------------------#
-
-# Paths to the root certificate files.
-# Normally you never need to change this.
-CA_KEY="/vagrant/script/ca.key"
-CA_CERT="/vagrant/script/ca.crt"
 
 # Expiry time of the certificates.
 CA_CERT_DAYS=1826
@@ -74,7 +74,7 @@ CA_CERT_CITY="Kraków"
 CA_CERT_COMPANY="AlligatorCon"
 CA_CERT_UNIT="Happy Hacker Automatically Generated Root Certificate"
 CA_CERT_DN="alligatorcon.pl"
-CA_CERT_EMAIL="info@alligatorcon.pl"
+CA_CERT_EMAIL="cfp@alligatorcon.pl"
 
 #CA_CERT_COUNTRY=""
 #CA_CERT_STATE=""
@@ -112,5 +112,5 @@ REPO_URL="https://git.openwrt.org/15.05/openwrt.git"
 
 # Optionally use a specific commit. This freezes the code to the point we want,
 # so further upstream commits don't break our patches.
-# Comment out this line to always use the latest commit (not recommended!).
+# Comment out this line to always use the latest commit.
 REPO_COMMIT="9a1fd3e313cedf1e689f6f4e342528ed27c09766"

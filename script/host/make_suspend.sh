@@ -10,15 +10,28 @@ source script/config.sh
 # Run different commands depending on the sandbox provider.
 case "${SANDBOX_PROVIDER}" in
 
-# Destroy the Vagrant VM.
-vagrant)
-  vagrant destroy
+# When not using a sandbox.
+none)
+  # No-op
   ;;
 
-# Stop and remove the Docker container.
+# Halt the Vagrant VM.
+vagrant)
+  vagrant halt
+  ;;
+
+# Stop the LXD container.
+lxd)
+  if [[ $(lxc info happyhacker-lxd 2> /dev/null | grep ^Status:\ .*\$ | sed "s/^Status: \(.*\)\$/\\1/" | grep -F Stopped | wc -c) = 0 ]]
+  then
+    echo "Stopping the container..."
+    lxc stop "${LXD_CONTAINER_NAME}"
+  fi
+  ;;
+
+# Stop the Docker container.
 docker)
   docker stop $CNT_NM
-  docker rm $CNT_NM
   ;;
 
 *)

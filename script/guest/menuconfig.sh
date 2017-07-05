@@ -5,7 +5,7 @@
 set -e
 
 # Load the build configuration variables.
-source /vagrant/script/config.sh
+source /OUTSIDE/script/config.sh
 
 # Define a working source directory.
 if (( $# == 0 ))
@@ -28,11 +28,11 @@ then
 fi
 mkdir "${SOURCE_DIR}"
 cd "${SOURCE_DIR}"
-tar -xaf "../${TAR_FILE}"
+tar -xaf "${TAR_FILE}"
 
 # Copy the existing configuration file, if any.
-CONFIG_FILE="/vagrant/profiles/${SOURCE_DIR}/config"
-DIFF_CONFIG_FILE="/vagrant/profiles/${SOURCE_DIR}/diffconfig"
+CONFIG_FILE="/OUTSIDE/profiles/${SOURCE_DIR}/config"
+DIFF_CONFIG_FILE="/OUTSIDE/profiles/${SOURCE_DIR}/diffconfig"
 if [ -e "${CONFIG_FILE}" ]
 then
     cp "${CONFIG_FILE}" .config
@@ -44,14 +44,14 @@ else
 fi
 
 # Apply the OpenWrt patches.
-PATCHES="/vagrant/profiles/${SOURCE_DIR}/patches"
+PATCHES="/OUTSIDE/profiles/${SOURCE_DIR}/patches"
 if [ -e "${PATCHES}" ]
 then
     while read p
     do
-       	if [ -e "/vagrant/patches/$p.diff" ]
+       	if [ -e "/OUTSIDE/patches/$p.diff" ]
         then
-            git apply -v "/vagrant/patches/$p.diff"
+            git apply -v "/OUTSIDE/patches/$p.diff"
        	fi
     done < "${PATCHES}"
 fi
@@ -68,7 +68,7 @@ fi
 make menuconfig
 
 # Copy the full and differential configuration files outside the VM.
-mkdir -p "/vagrant/profiles/${SOURCE_DIR}"
+mkdir -p "/OUTSIDE/profiles/${SOURCE_DIR}"
 cp .config "${CONFIG_FILE}"
 ./scripts/diffconfig.sh > "${DIFF_CONFIG_FILE}"
 

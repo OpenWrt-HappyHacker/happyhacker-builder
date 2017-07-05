@@ -1,12 +1,10 @@
 # docker build -t happyhacker/openwrtbuilder:0.1 .
 FROM ubuntu:15.04
+MAINTAINER "b0rh" <francisco@garnelo.eu>
 ENV container docker
 ENV LC_ALL C
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm-256color
-VOLUME [ "/sys/fs/cgroup" ]
-CMD ["/sbin/init"]
-#EXPOSE 22
 
 #https://github.com/tozd/docker-ubuntu-systemd
 
@@ -85,20 +83,12 @@ RUN apt-get update -qq \
 RUN \
   apt-get install -y --no-install-recommends openssh-server sudo
 
-# Provisioning scripts and custom ssh keys
-RUN mkdir -p /vagrant/script/data/builder-keys
-RUN mkdir -p /vagrant/script/guest
-RUN mkdir -p /vagrant/script/host
-COPY ./script/* /vagrant/script/
-COPY ./script/data/* /vagrant/script/data/
-COPY ./script/data/builder-keys/* /vagrant/script/data/builder-keys/
-COPY ./script/guest/* /vagrant/script/guest/
-COPY ./script/host/* /vagrant/script/host/
-RUN touch /vagrant/building
+# Builder dependencies
+RUN \
+  apt-get install -y uuid-runtime
+
 
 # Vagrant user and ssh key
-# TODO: Add custom user
-
 RUN \
   # "vagrant" User and default ssh certificate
   apt-get install -y curl && \
@@ -107,8 +97,7 @@ RUN \
   install -m 755 -o vagrant -g vagrant -d /home/vagrant && \
   install -m 700 -o vagrant -g vagrant -d /home/vagrant/.ssh && \
   #curl -sL https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub >> /home/vagrant/.ssh/authorized_keys &&\
-  #echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key' > /home/vagrant/.ssh/authorized_keys \
-  echo "$(cat /vagrant/script/data/builder-keys/ssh.pub)" > /home/vagrant/.ssh/authorized_keys \
+  echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key' > /home/vagrant/.ssh/authorized_keys \
   chmod 600 /home/vagrant/.ssh/authorized_keys && \
   chown vagrant:vagrant /home/vagrant/.ssh/authorized_keys && \
 
@@ -129,19 +118,45 @@ RUN \
   # Other Docker image fixes
   mkdir -p /var/run/sshd && \
   echo "export TERM=xterm-256color" > /home/vagrant/.bashrc && \
-  rm /usr/sbin/policy-rc.d
+  rm /usr/sbin/policy-rc.d 
 
 # Openwrt and happyhacker build dependencies
-RUN /vagrant/script/guest/provision.sh
-
-RUN rm /vagrant -rf
-
 RUN \
-# "vagrant-cachier" friendly
-rm /etc/apt/apt.conf.d/docker-clean && \
+# Install the Haveged daemon. This should somewhat improve the entropy pool.
+# We need a good entropy pool to generate the various keys we need.
 
-# Cleanup
+  apt-get install -y haveged &&\
 
-apt-get clean && \
-rm -rf /var/lib/apt/lists/*
+  # Install all possible dependencies for all OpenWrt packages.
+  # This is more than we need right now but it covers all future possibilities,
+  # as well as what users may want in their custom ROMs.
+  
+  apt-get install -y asciidoc bash bc bcc bin86 binutils build-essential bzip2 \
+  fastjar flex g++ gawk gcc gcc-multilib genisoimage gettext git-core \
+  intltool jikespg libboost-dev libgtk2.0-dev libncurses5-dev libssl-dev \
+  libusb-dev libxml-parser-perl make mercurial openjdk-7-jdk patch \
+  perl-modules python-dev rsync ruby sdcc sharutils subversion unzip \
+  util-linux wget xsltproc zlib1g-dev curl && \
 
+  # The following packages are required by our scripts.
+  apt-get install -y colorgcc colormake coreutils makepasswd && \
+
+  # Install Tor and immediately stop the daemon.
+  # We will use it only to generate hidden service keys, it will not connect
+  # to the rest of the Tor network at any time.
+  apt-get install -y tor && \
+
+  # "vagrant-cachier" friendly
+  rm /etc/apt/apt.conf.d/docker-clean && \
+
+  # Cleanup
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/* && \
+
+  # Create the symlinks to the /INSIDE and /OUTSIDE directories.
+  ln -s /home/vagrant /INSIDE && \
+  ln -s /vagrant /OUTSIDE
+
+VOLUME [ "/sys/fs/cgroup" ]
+CMD ["/sbin/init"]
+EXPOSE 22

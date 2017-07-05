@@ -19,8 +19,8 @@ fi
 if [ -z "${PROFILE_DIR}" ]
 then
     >&2 echo "Warning: no profile set, using global CA settings"
-    CA_KEY="/vagrant/script/data/ca.key"
-    CA_CERT="/vagrant/script/data/ca.crt"
+    CA_KEY="/OUTSIDE/script/data/ca.key"
+    CA_CERT="/OUTSIDE/script/data/ca.crt"
 else
     CA_KEY="${PROFILE_DIR}/ca.key"
     CA_CERT="${PROFILE_DIR}/ca.crt"

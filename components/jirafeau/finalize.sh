@@ -8,4 +8,4 @@ cp -r -- ./files/etc/tor/lib/hidden_service/WEBtor/ "${OUTPUT_DIR}/keys/"
 cp -- ./files/etc/uhttpd.* "${OUTPUT_DIR}/keys/uhttpd/"
 
 # Copy the root certificates as well.
-/vagrant/script/guest/copy_ssl_root_cert.sh "${OUTPUT_DIR}/keys/ca/"
+/OUTSIDE/script/guest/copy_ssl_root_cert.sh "${OUTPUT_DIR}/keys/ca/"

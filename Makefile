@@ -31,14 +31,17 @@ suspend:
 destroy:
 	script/host/make_destroy.sh
 
-bin/%: up
-	script/host/make_target.sh \"$(notdir $@)\"
-
-menuconfig: up
-	script/host/make_menuconfig.sh \"$(CONFIG)\"
+provision: up
+	script/host/make_provision.sh
 
 ssh: up
 	script/host/make_ssh.sh
+
+bin/%: up
+	script/host/make_target.sh $(notdir $@)
+
+menuconfig: up
+	script/host/make_menuconfig.sh $(CONFIG)
 
 clean:
 	script/host/make_clean.sh

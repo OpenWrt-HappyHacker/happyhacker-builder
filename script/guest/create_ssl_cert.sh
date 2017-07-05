@@ -18,11 +18,11 @@ then
 fi
 
 # Load the build configuration variables.
-source /vagrant/script/config.sh
+source /OUTSIDE/script/config.sh
 
 # Paths to the global root certificate files, if present.
-CA_GLOBAL_KEY="/vagrant/script/data/ca.key"
-CA_GLOBAL_CERT="/vagrant/script/data/ca.crt"
+CA_GLOBAL_KEY="/OUTSIDE/script/data/ca.key"
+CA_GLOBAL_CERT="/OUTSIDE/script/data/ca.crt"
 
 # Paths to the per-profile root certificate files.
 # If for some reason we don't have a profile set, use the global one.

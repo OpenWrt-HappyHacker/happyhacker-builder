@@ -25,7 +25,7 @@ To modify the OpenWrt configuration for an existing profile:
 To quickly SSH into the build contianer/VM:
     make ssh
 
-Vagrant/Docker guest control:
+To control the build container:
     make up
     make suspend
     make destroy

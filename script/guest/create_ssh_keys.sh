@@ -18,7 +18,7 @@ then
 fi
 
 # Load the build configuration variables.
-source /vagrant/script/config.sh
+source /OUTSIDE/script/config.sh
 
 # Generate the keypair.
 echo "Generating new SSH keypair..."

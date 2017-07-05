@@ -1,16 +1,21 @@
 #!/bin/bash
+
+# This script prepares the environment inside the VM (or container)
+# to build OpenWrt. It does not require a privileged user.
+
+# Fail on error for any line.
 set -e
 
-# Needed in some scenarios. Doesn't hurt when not needed.
-cd /home/vagrant/
+# Print the banner.
+>&2 echo "---------------------------------------------------------------------"
+>&2 echo "DOWNLOADING OPENWRT SOURCE CODE"
+>&2 echo "---------------------------------------------------------------------"
+
+# Easier to reference the inside paths this way.
+cd /INSIDE
 
 # Load the build configuration variables.
-source /vagrant/script/config.sh
-
-# Enable colors in the console.
-if [ -e ".bashrc" ]; then
-    sed -i s/\\#force_color_prompt\\=yes/force_color_prompt=yes/ .bashrc
-fi
+source /OUTSIDE/script/config.sh
 
 # Clone the OpenWrt source code.
 SOURCE_DIR="openwrt"
@@ -37,11 +42,11 @@ fi
 
 # Make a tarfile with a cache of the original code.
 # That way we don't need to checkout the repository again on each build.
-if [ -e "../${TAR_FILE}" ]
+if [ -e "${TAR_FILE}" ]
 then
-    rm -- "../${TAR_FILE}"
+    rm -- "${TAR_FILE}"
 fi
-tar -caf "../${TAR_FILE}" .
+tar -caf "${TAR_FILE}" .
 cd ..
 
 # Delete the source code now. On each build it will be extracted from the tarfile.

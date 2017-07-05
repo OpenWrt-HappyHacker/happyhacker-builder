@@ -57,7 +57,7 @@ set -e
 TIMESTAMP_START=$(date +%s.%N)
 
 # Load the build configuration variables.
-source /vagrant/script/config.sh
+source /OUTSIDE/script/config.sh
 
 # If the MAKE_JOBS argument is missing, use the number of cores instead.
 if [ "${MAKE_JOBS}" == "" ]
@@ -66,10 +66,12 @@ then
 fi
 
 # Set a variable with the directory with the profile-specific files and config.
-PROFILE_DIR="/vagrant/profiles/$1"
+PROFILE_DIR="/OUTSIDE/profiles/$1"
 
 # Set a variable with the output directory.
-OUTPUT_DIR="/vagrant/bin/$1"
+OUTPUT_BASE_DIR="/OUTSIDE/bin/$1"
+OUTPUT_UUID="$(uuidgen)"
+OUTPUT_DIR="${OUTPUT_BASE_DIR}/${OUTPUT_UUID}"
 
 # Verify command line arguments.
 case $# in
@@ -107,9 +109,9 @@ esac
 >&2 echo "BUILDING FIRMWARE IMAGE FOR PROFILE: $1"
 >&2 echo "---------------------------------------------------------------------"
 
-# Get the OpenWrt source code.
-echo "Fetching source code from cache..."
-SOURCE_DIR="$1"
+# Create the source directory where we will build the image, and switch to it.
+mkdir -p "${BUILD_BASEDIR}/"
+SOURCE_DIR="${BUILD_BASEDIR}/$1"
 cd ~
 if [ -e "${SOURCE_DIR}" ]
 then
@@ -117,20 +119,51 @@ then
 fi
 mkdir "${SOURCE_DIR}"
 cd "${SOURCE_DIR}"
-tar -xaf "../${TAR_FILE}"
-echo -e "Applying customizations...\n"
 
-# Copy the makefile configuration and custom files for the desired profile.
-if [ -e "${PROFILE_DIR}/config" ]
+# If there is a pre-compiled image generator, use it.
+IMAGE_BUILDER="${OUTPUT_BASE_DIR}/builder.tar.bz2"
+if [ -e "${IMAGE_BUILDER}" ]
 then
-    cp "${PROFILE_DIR}/config" .config
+    echo "Image generator found at: ${IMAGE_BUILDER}"
+
+    # Extract the image generator.
+    echo "Extracting image generator..."
+    tar -xaf "${IMAGE_BUILDER}"
+    echo -e "Applying customizations...\n"
+
+# If there is no pre-compiled generator, build from sources.
 else
-    if [ -e "${PROFILE_DIR}/diffconfig" ]
+    echo "No image generator found, building from sources."
+
+    # Get the OpenWrt source code.
+    echo "Fetching source code from cache..."
+    tar -xaf "${TAR_FILE}"
+    echo -e "Applying customizations...\n"
+
+    # Apply the OpenWrt patches.
+    if [ -e "${PROFILE_DIR}/patches" ]
     then
-        cp "${PROFILE_DIR}/diffconfig" .config
+        while read p
+        do
+            if [ -e "/OUTSIDE/patches/$p.diff" ]
+            then
+                git apply -v "/OUTSIDE/patches/$p.diff"
+            fi
+        done < "${PROFILE_DIR}/patches"
+    fi
+
+    # Copy the makefile configuration for this profile.
+    if [ -e "${PROFILE_DIR}/config" ]
+    then
+        cp "${PROFILE_DIR}/config" .config
     else
-        echo "ERROR: missing configuration file"
-        exit 1
+        if [ -e "${PROFILE_DIR}/diffconfig" ]
+        then
+            cp "${PROFILE_DIR}/diffconfig" .config
+        else
+            echo "ERROR: missing configuration file"
+            exit 1
+        fi
     fi
 fi
 
@@ -139,7 +172,7 @@ if [ -e "${PROFILE_DIR}/components" ]
 then
     while read src
     do
-        COMPONENT_DIR="/vagrant/components/$src"
+        COMPONENT_DIR="/OUTSIDE/components/$src"
         if [ -e "${COMPONENT_DIR}/files/" ]
         then
             cp -rvT "${COMPONENT_DIR}/files/" ./files/
@@ -151,18 +184,6 @@ fi
 if [ -e "${PROFILE_DIR}/files/" ]
 then
     cp -rvT "${PROFILE_DIR}/files/" ./files/
-fi
-
-# Apply the OpenWrt patches.
-if [ -e "${PROFILE_DIR}/patches" ]
-then
-    while read p
-    do
-        if [ -e "/vagrant/patches/$p.diff" ]
-        then
-            git apply -v "/vagrant/patches/$p.diff"
-        fi
-    done < "${PROFILE_DIR}/patches"
 fi
 
 # Delete the temporary files.
@@ -178,7 +199,7 @@ if [ -e "${PROFILE_DIR}/components" ]
 then
     while read src
     do
-        COMPONENT_DIR="/vagrant/components/$src"
+        COMPONENT_DIR="/OUTSIDE/components/$src"
         if [ -e "${COMPONENT_DIR}/initialize.sh" ]
         then
             source "${COMPONENT_DIR}/initialize.sh"
@@ -192,23 +213,42 @@ then
     source "${PROFILE_DIR}/initialize.sh"
 fi
 
-# If it was a full configuration file, fix the makefile if it was generated
-# using an older version of OpenWrt. If it was a differential configuration
-# file, convert it to a full configuration file.
-if [ -e "${PROFILE_DIR}/config" ]
+# If building with the image generator...
+if [ -e "${IMAGE_BUILDER}" ]
 then
-    make oldconfig
-else
-    make defconfig
-fi
 
-# Build OpenWrt.
-echo -e "\nCompiling...\n"
-if (( ${VERBOSE} == 0 ))
-then
-    make -j${MAKE_JOBS}
+    # Create the image with the target profile we selected in the config file.
+    # We don't have parallelization or verbosity control anymore.
+    # Also, the image builder is so dumb it won't remember the profile and packages
+    # we used when building, so we need to recreate all that ourselves.
+    # Furthermore, the packages we have built may not even match those of the profile.
+    # We can't use the official repo over the internet either (that's the OpenWrt wiki "fix").
+    # (Sorry for being such a hater, but... waaaay too much time wasted on this kinda crap...)
+    echo -e "\nCreating image...\n"
+    make info > make_info.txt
+    bash -c "$(/OUTSIDE/script/guest/get_openwrt_image_builder_command_line.py)"
+
+# If building from sources...
 else
-    make -j1 V=s
+
+    # If it was a full configuration file, fix the makefile if it was generated
+    # using an older version of OpenWrt. If it was a differential configuration
+    # file, convert it to a full configuration file.
+    if [ -e "${PROFILE_DIR}/config" ]
+    then
+        make oldconfig
+    else
+        make defconfig
+    fi
+
+    # Build OpenWrt.
+    echo -e "\nCompiling...\n"
+    if (( ${VERBOSE} == 0 ))
+    then
+        make -j${MAKE_JOBS}
+    else
+        make -j1 V=s
+    fi
 fi
 
 # Copy the output and logs to the vagrant synced directory.
@@ -218,6 +258,7 @@ fi
 if [ -e bin ] && [ $(find bin/ -maxdepth 1 -type d -printf 1 | wc -m) -eq 2 ]
 then
     rm -fr -- "${OUTPUT_DIR}/"
+    mkdir -p "${OUTPUT_BASE_DIR}"
     cp -r bin/*/ "${OUTPUT_DIR}/"
     if [ -e logs/ ]
     then
@@ -234,7 +275,7 @@ else
     fi
 fi
 >&2 echo -e "\nBuild finished."
->&2 echo "Output files stored in: bin/$1"
+>&2 echo "Output files stored in: bin/$1/${OUTPUT_UUID}"
 
 # Run the after build scripts for each component.
 # The 
@@ -243,7 +284,7 @@ if [ -e "${PROFILE_DIR}/components" ]
 then
     while read src
     do
-        COMPONENT_DIR="/vagrant/components/$src"
+        COMPONENT_DIR="/OUTSIDE/components/$src"
         if [ -e "${COMPONENT_DIR}/finalize.sh" ]
         then
             source "${COMPONENT_DIR}/finalize.sh"
@@ -258,10 +299,43 @@ then
     source "${PROFILE_DIR}/finalize.sh"
 fi
 
+# If there is no image builder, copy the one we just built.
+# We need to work around some of the problems with the image builder here.
+if [ ! -e "${IMAGE_BUILDER}" ]
+then
+    echo "Preparing the image builder..."
+
+    # We will work in a temporary subdirectory.
+    mkdir builder
+    cd builder
+
+    # Extract the OpenWrt image builder.
+    tar -xaf "$(find ${OUTPUT_DIR} -maxdepth 1 -name 'OpenWrt-ImageBuilder-*' -print -quit)"
+
+    # Fix the path problem (we want a consistent directory structure).
+    mv -- OpenWrt-ImageBuilder-*/{.[!.],}* .
+    rmdir -- OpenWrt-ImageBuilder-*
+
+    # We could copy the script generated files here too...
+    # But let's not do that, since the image builder won't work on its own anyway.
+    # Also we don't want anyone to create firmware images with duplicated keys.
+    # In the future we may want to bundle some of our scripts here for optional standalone usage.
+    #cp -r ../files .
+
+    # Re-compress the image builder inn a known location with a consistent filename.
+    tar -cjf "${OUTPUT_BASE_DIR}/builder.tar.bz2" .
+
+    # Go back to the parent directory.
+    cd ..
+
+    # No need to delete the temporary directory, since that's done immediately after this code.
+    #rm -fr builder
+fi
+
 # Delete all of the build files in the VM. This is needed to
 # free some disk space, otherwise the HD fills up too quickly
 # and builds begin to fail.
-echo "Clearing up the VM hard drive..."
+echo "Clearing up the temporary files..."
 cd ~
 rm -fr -- "${SOURCE_DIR}"
 

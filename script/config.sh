@@ -5,37 +5,12 @@
 # since it's a Bash/Ruby polyglot file.
 
 #------------------------------------------------------------------------------#
-# Build VM settings.
+# Build settings.
 #------------------------------------------------------------------------------#
 
 # Set the sandbox (virtualization/container) provider.
-# Valid values are "docker" and "vagrant".
-SANDBOX_PROVIDER="vagrant"
-
-# When using Vagrant, set the virtualization provider.
-# Only VirtualBox was tested.
-# This setting is ignored when using Docker.
-VIRT_PROVIDER="virtualbox"
-
-# Number of CPU cores to give to the build VM.
-# One core is more conservative and easier to debug, but slower.
-# We recommend using 4 cores for quicker builds.
-# See also the MAKE_JOBS setting.
-NUM_CORES=4
-
-# Amount of RAM in megabytes to give to the build VM.
-# Will not work without AT LEAST 4 gigabytes.
-# This setting is ignored when using Docker.
-VM_MEMORY=8192
-
-# Container settings when using Docker.
-# This is ignored when using Vagrant.
-CNT_TP="happyhacker/openwrtbuilder:0.1"
-CNT_NM="hh-builder"
-
-#------------------------------------------------------------------------------#
-# Build settings.
-#------------------------------------------------------------------------------#
+# Valid values are "none", "docker", "lxd" and "vagrant".
+SANDBOX_PROVIDER="lxd"
 
 # Number of parallel Make jobs. If ommitted it will default to the number of
 # cores (NUM_CORES). In our tests OpenWrt wouldn't build correctly in parallel
@@ -46,9 +21,82 @@ CNT_NM="hh-builder"
 # Turn verbose mode on (1) or off (0). Implies MAKE_JOBS=1.
 VERBOSE=0
 
+#------------------------------------------------------------------------------#
+# Docker settings.
+#------------------------------------------------------------------------------#
+
+# The following settings only apply when SANDBOX_PROVIDER is "docker".
+
+# Container default conf
+CNT_TP='nimmis/alpine-micro'
+CNT_NM='BuilderNG' # Pass name as script argument
+CNT_TG='HHv1' # container version tag
+
+CNT_USR='maker'
+CNT_USR_HOME="/home/$CNT_USR"
+CNT_SHAREPATH='/OUTSIDE'
+
+HST_BASEDIR="$(pwd)"
+#HST_SHAREPATH="$HST_BASEDIR/INSIDE"
+HST_SHAREPATH="$HST_BASEDIR"
+
+#------------------------------------------------------------------------------#
+# LXD settings.
+#------------------------------------------------------------------------------#
+
+# The following settings only apply when SANDBOX_PROVIDER is "lxd".
+
+# Remote image to build the container with.
+LXD_REMOTE_IMAGE="ubuntu:16.04"
+
+# Name of the profile.
+LXD_PROFILE_NAME="happyhacker-prf"
+
+# Name of the build container.
+LXD_CONTAINER_NAME="happyhacker-ctr"
+
+# Name of the build container's network.
+LXD_NETWORK_NAME="happyhacker-net"
+
+# Name of the unprivileged user and group inside the container.
+# WARNING: due to some implementation issues, this value may be repeated in some
+# other scripts. We hope to be able to fix this soon... in the meantime, if you
+# want to change it you'll have to grep the script/ directory. :(
+LXD_INSIDE_USER="ubuntu"
+LXD_INSIDE_GROUP="ubuntu"
+
+#------------------------------------------------------------------------------#
+# Vagrant settings.
+#------------------------------------------------------------------------------#
+
+# The following settings only apply when SANDBOX_PROVIDER is "vagrant".
+
+# When using Vagrant, set the virtualization provider.
+# Only VirtualBox was tested.
+VIRT_PROVIDER="virtualbox"
+
+# Number of CPU cores to give to the build VM.
+# One core is more conservative and easier to debug, but slower.
+# We recommend using 4 cores for quicker builds.
+# See also the MAKE_JOBS setting.
+NUM_CORES=4
+
+# Amount of RAM in megabytes to give to the build VM.
+# Will not work without AT LEAST 4 gigabytes.
+VM_MEMORY=8192
+
+#------------------------------------------------------------------------------#
+# Advanced build settings.
+#------------------------------------------------------------------------------#
+
+# Directory where build files will be written to temporarily.
+# Contents may be deleted when the build is finished.
+# Normally you never need to change this.
+BUILD_BASEDIR="/INSIDE"
+
 # Cache where the original, unmodified OpenWrt source code will be kept.
 # Normally you never need to change this.
-TAR_FILE="openwrt.tar.bz2"
+TAR_FILE="/INSIDE/openwrt.tar.bz2"
 
 #------------------------------------------------------------------------------#
 # SSL/TLS certificate settings.
@@ -108,4 +156,4 @@ REPO_URL="https://git.openwrt.org/15.05/openwrt.git"
 # Optionally use a specific commit. This freezes the code to the point we want,
 # so further upstream commits don't break our patches.
 # Comment out this line to always use the latest commit.
-REPO_COMMIT="9a1fd3e313cedf1e689f6f4e342528ed27c09766"
+#REPO_COMMIT="9a1fd3e313cedf1e689f6f4e342528ed27c09766"

@@ -4,7 +4,7 @@
 set -e
 
 # Load the build configuration variables.
-source /vagrant/script/config.sh
+source /OUTSIDE/script/config.sh
 
 # Copy the SSH keys to the output directory.
 mkdir -p "${OUTPUT_DIR}/keys/dropbear"

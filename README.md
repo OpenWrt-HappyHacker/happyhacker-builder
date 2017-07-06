@@ -25,7 +25,7 @@ Our plans for the near future are: fix a few things in OpenWrt that don't quite 
 
 * But I saw your talk and you had demo of a working system! Where is it?
 
-You can find a copy of the firmware we used for the demos in the [Presentations](https://github.com/OpenWrt-HappyHacker/Presentations/Demos) repo.
+You can find a copy of the firmware we used for the demos in the [Presentations](https://github.com/OpenWrt-HappyHacker/Presentations/tree/master/Demos) repo.
 
 * Can this thing be used by Bad People?
 

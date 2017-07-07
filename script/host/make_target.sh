@@ -26,10 +26,7 @@ vagrant)
 
 # When using LXD.
 lxd)
-  source ./script/host/lxd_sync_host_to_guest.sh
   lxc exec "${LXD_CONTAINER_NAME}" -- su "${LXD_INSIDE_USER}" -c "/OUTSIDE/script/guest/build.sh \"$1\""
-  TARGET="$1"
-  source ./script/host/lxd_sync_guest_to_host.sh
   ;;
 
 # When using Docker.

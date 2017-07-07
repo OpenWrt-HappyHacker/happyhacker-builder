@@ -4,13 +4,15 @@
 # Particularly refrain from adding anynthing other than variables here,
 # since it's a Bash/Ruby polyglot file.
 
+# Unless specified, all settings here are mandatory.
+
 #------------------------------------------------------------------------------#
 # Build settings.
 #------------------------------------------------------------------------------#
 
 # Set the sandbox (virtualization/container) provider.
 # Valid values are "none", "docker", "lxd" and "vagrant".
-SANDBOX_PROVIDER="lxd"
+SANDBOX_PROVIDER="vagrant"
 
 # Number of parallel Make jobs. If ommitted it will default to the number of
 # cores (NUM_CORES). In our tests OpenWrt wouldn't build correctly in parallel
@@ -59,11 +61,15 @@ LXD_CONTAINER_NAME="happyhacker-ctr"
 LXD_NETWORK_NAME="happyhacker-net"
 
 # Name of the unprivileged user and group inside the container.
-# WARNING: due to some implementation issues, this value may be repeated in some
-# other scripts. We hope to be able to fix this soon... in the meantime, if you
-# want to change it you'll have to grep the script/ directory. :(
+# It depends on the exact base image you used.
+# On the default ubuntu 16.04 container that is "ubuntu:ubuntu".
 LXD_INSIDE_USER="ubuntu"
 LXD_INSIDE_GROUP="ubuntu"
+
+# This is the network interface used by the container.
+# It depends on the exact base image you used.
+# On the default ubuntu 16.04 container that is "eth0".
+LXD_INSIDE_IFACE="eth0"
 
 #------------------------------------------------------------------------------#
 # Vagrant settings.
@@ -106,7 +112,7 @@ TAR_FILE="/INSIDE/openwrt.tar.bz2"
 CA_CERT_DAYS=1826
 SSL_CERT_DAYS=730
 
-# Key size. 4096 bytes recommended.
+# Key size. 4096 bits recommended.
 SSL_KEY_SIZE=4096
 
 # Default values for testing.
@@ -117,7 +123,7 @@ CA_CERT_CITY="Kraków"
 CA_CERT_COMPANY="AlligatorCon"
 CA_CERT_UNIT="Happy Hacker Automatically Generated Root Certificate"
 CA_CERT_DN="alligatorcon.pl"
-CA_CERT_EMAIL="cfp@alligatorcon.pl"
+CA_CERT_EMAIL="crapula@alligatorcon.pl"
 
 #CA_CERT_COUNTRY=""
 #CA_CERT_STATE=""
@@ -156,4 +162,4 @@ REPO_URL="https://git.openwrt.org/15.05/openwrt.git"
 # Optionally use a specific commit. This freezes the code to the point we want,
 # so further upstream commits don't break our patches.
 # Comment out this line to always use the latest commit.
-#REPO_COMMIT="9a1fd3e313cedf1e689f6f4e342528ed27c09766"
+REPO_COMMIT="9a1fd3e313cedf1e689f6f4e342528ed27c09766"

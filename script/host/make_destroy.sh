@@ -25,26 +25,7 @@ vagrant)
 #-----------------------------------------------------------------------------
 # When using LXD.
 lxd)
-
-  # If the container exists, stop and destroy it.
-  if [[ $(lxc info "${LXD_CONTAINER_NAME}" 2> /dev/null | wc -c) = 0 ]]
-  then
-    echo "Container was already deleted, nothing to do."
-  else
-    echo "Deleting container..."
-    lxc delete --force "${LXD_CONTAINER_NAME}"
-  fi
-
-  # If the network exists, delete it.
-  # This assumes no other container is attached to it.
-  if [[ $(lxc network show "${LXD_NETWORK_NAME}" 2> /dev/null | wc -c) = 0 ]]
-  then
-    echo "Network was already deleted, nothing to do."
-  else
-    echo "Deleting network..."
-    lxc network delete "${LXD_NETWORK_NAME}"
-  fi
-
+  source ./script/host/lxd_destroy.sh
   ;;
 
 #-----------------------------------------------------------------------------

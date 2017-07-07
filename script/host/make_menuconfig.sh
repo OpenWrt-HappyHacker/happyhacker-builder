@@ -26,16 +26,7 @@ vagrant)
 
 # When using LXD.
 lxd)
-
-  # Synchronize the shared folders, host to guest.
-  source ./script/host/lxd_sync_host_to_guest.sh
-
-  # Run the menuconfig script.
   lxc exec "${LXD_CONTAINER_NAME}" -- su "${LXD_INSIDE_USER}" -c "/OUTSIDE/script/guest/menuconfig.sh \"$1\""
-
-  # Synchronize the shared folders, guest to host.
-  source ./script/host/lxd_sync_guest_to_host.sh
-
   ;;
 
 # When using Docker.

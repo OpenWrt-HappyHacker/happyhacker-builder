@@ -9,18 +9,14 @@
 # Fail on error for any line.
 set -e
 
-# This is the unprivileged user created by the container.
-# It depends on the exact base image you used.
-# On the default ubuntu container that is "ubuntu".
-INSIDE_USER="ubuntu"
-
-# This is the network interface used by the container.
-# It depends on the exact base image you used.
-# On the default ubuntu container that is "eth0".
-INSIDE_IFACE="eth0"
-
 # Load the build configuration variables.
 source /OUTSIDE/script/config.sh
+
+# Create the /INSIDE directory.
+if ! [ -e /INSIDE ]
+then
+    ln -s /home/${LXD_INSIDE_USER} /INSIDE
+fi
 
 # Change the DNS servers to OpenDNS.
 # OpenWrt builds require downloading several files from the Internet,
@@ -34,10 +30,10 @@ FILE="/etc/dhcp/dhclient.conf"
 grep -q "$LINE" "$FILE" || echo "$LINE" >> "$FILE"
 
 # Enable networking if needed.
-if [[ "$(cat /sys/class/net/${INSIDE_IFACE}/operstate)" != "up" ]]
+if [[ "$(cat /sys/class/net/${LXD_INSIDE_IFACE}/operstate)" != "up" ]]
 then
-  ifconfig ${INSIDE_IFACE} up
-  dhclient ${INSIDE_IFACE}
+  ifconfig ${LXD_INSIDE_IFACE} up
+  dhclient ${LXD_INSIDE_IFACE}
 fi
 
 # Setup the required packages.
@@ -46,11 +42,11 @@ source /OUTSIDE/script/guest/prov-packages.sh
 
 # Setup the home folder in the container.
 # This script runs as an unprivileged user.
-su ${INSIDE_USER} -c /OUTSIDE/script/guest/prov-lxd-user.sh
+su ${LXD_INSIDE_USER} -c /OUTSIDE/script/guest/prov-lxd-user.sh
 
 # Setup the build environment.
 # This script runs as an unprivileged user.
-su ${INSIDE_USER} -c /OUTSIDE/script/guest/prov-environment.sh
+su ${LXD_INSIDE_USER} -c /OUTSIDE/script/guest/prov-environment.sh
 
 # Mark the container as provisioned.
 touch /.provisioned

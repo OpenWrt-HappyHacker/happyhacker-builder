@@ -7,7 +7,7 @@
 # component is a piece of software or configuration that defines a certain functionality. For example, you may have components to set up a Tor node and a file
 # sharing webapp, and a profile for a specific compatible device that includes both components to make up a file sharing service over Tor.
 #
-# The files are laid out like this:
+# The files are laid out like this (all are optional unless specified):
 #
 #   bin/{profile}/*                       This is where the output files will be written
 #
@@ -15,6 +15,7 @@
 #   profiles/{profile}/diffconfig         Differential configuration file, only used if config is missing
 #   profiles/{profile}/components         List of components to be included in this profile
 #   profiles/{profile}/patches            List of patches to be applied on this profile
+#   profiles/{profile}/output             List of output files from the OpenWrt compilation to be obtained
 #
 #   profiles/{profile}/files/*            Files to be included directly in the device filesystem
 #   profiles/{profile}/initialize.sh      Initialization script for this profile
@@ -42,8 +43,6 @@
 # After the scripts are run, OpenWrt is compiled, and the output image files are placed in the bin directory. When the compilation is finished, the finish
 # scripts are run - first the ones defined for each component (as always, in order) and finally the one for the profile. The purpose of the finish scripts is
 # to customize the image files after compilation is done - for example you could generate secure hashes or do a cryptographic signature here.
-#
-# As a final step, the files in the bin directory are copied outside of the VM into the corresponding location for this profile.
 #
 ##
 #####
@@ -109,6 +108,10 @@ esac
 >&2 echo "BUILDING FIRMWARE IMAGE FOR PROFILE: $1"
 >&2 echo "---------------------------------------------------------------------"
 
+# Create the output directory where we will store all the files we build.
+mkdir -p "${OUTPUT_DIR}/firmware"
+mkdir -p "${OUTPUT_DIR}/keys"
+
 # Create the source directory where we will build the image, and switch to it.
 mkdir -p "${BUILD_BASEDIR}/"
 SOURCE_DIR="${BUILD_BASEDIR}/$1"
@@ -120,18 +123,12 @@ fi
 mkdir "${SOURCE_DIR}"
 cd "${SOURCE_DIR}"
 
-# If there is a pre-compiled image generator, use it.
+# If the image generator was not compiled yet, compile it.
+# This may take a very long time (about half an hour in a good laptop).
 IMAGE_BUILDER="${OUTPUT_BASE_DIR}/builder.tar.bz2"
 if [ -e "${IMAGE_BUILDER}" ]
 then
     echo "Image generator found at: ${IMAGE_BUILDER}"
-
-    # Extract the image generator.
-    echo "Extracting image generator..."
-    tar -xaf "${IMAGE_BUILDER}"
-    echo -e "Applying customizations...\n"
-
-# If there is no pre-compiled generator, build from sources.
 else
     echo "No image generator found, building from sources."
 
@@ -143,13 +140,13 @@ else
     # Apply the OpenWrt patches.
     if [ -e "${PROFILE_DIR}/patches" ]
     then
-        while read p
+        grep -v '^[ \t]*#' "${PROFILE_DIR}/patches" | grep -v '^[ \t]*$' | while read p
         do
             if [ -e "/OUTSIDE/patches/$p.diff" ]
             then
                 git apply -v "/OUTSIDE/patches/$p.diff"
             fi
-        done < "${PROFILE_DIR}/patches"
+        done
     fi
 
     # Copy the makefile configuration for this profile.
@@ -165,7 +162,77 @@ else
             exit 1
         fi
     fi
+
+    # Delete the temporary files.
+    # If we miss this step, sometimes make behaves strangely.
+    if [ -e tmp/ ]
+    then
+        rm -fr tmp/
+        mkdir tmp
+    fi
+
+    # If it was a full configuration file, fix the makefile if it was generated
+    # using an older version of OpenWrt. If it was a differential configuration
+    # file, convert it to a full configuration file.
+    if [ -e "${PROFILE_DIR}/config" ]
+    then
+        make oldconfig
+    else
+        make defconfig
+    fi
+
+    # Store the configuration file we're effectively using.
+    # This is useful for future reference.
+    cp .config "${OUTPUT_DIR}/config"
+
+    # Build OpenWrt.
+    echo -e "\nCompiling the OpenWrt source code...\n"
+    if (( ${VERBOSE} == 0 ))
+    then
+        make -j${MAKE_JOBS}
+    else
+        make -j1 V=s
+    fi
+
+    # We need to work around some of the problems with the image builder here.
+    echo "Preparing the image builder..."
+
+    # We will work in a temporary subdirectory.
+    mkdir builder
+    cd builder
+
+    # Extract the OpenWrt image builder.
+    tar -xaf "$(find ../bin -maxdepth 2 -name 'OpenWrt-ImageBuilder-*' -print -quit)"
+
+    # Fix the path problem (we want a consistent directory structure).
+    mv -- OpenWrt-ImageBuilder-*/{.[!.],}* .
+    rmdir -- OpenWrt-ImageBuilder-*
+
+    # Re-compress the image builder in a known location with a consistent filename.
+    mkdir -p "${OUTPUT_BASE_DIR}/"
+    tar -cjf "${OUTPUT_BASE_DIR}/builder.tar.bz2" .
+
+    # Go back to the parent directory.
+    cd ..
+
+    # Delete all the build files.
+    cd ..
+    rm -fr -- "${SOURCE_DIR}/"
+    mkdir "${SOURCE_DIR}"
+    cd "${SOURCE_DIR}"
 fi
+
+# Just some paranoid programming...
+if ! [ -e "${IMAGE_BUILDER}" ]
+then
+    >&2 echo "INTERNAL ERROR"
+    exit 1
+fi
+
+# Extract the image generator.
+echo "Extracting image generator..."
+tar -xaf "${IMAGE_BUILDER}"
+echo -e "Applying customizations...\n"
 
 # Copy the custom files for each component.
 if [ -e "${PROFILE_DIR}/components" ]
@@ -197,150 +264,98 @@ fi
 # Run the per-component initialization scripts.
 if [ -e "${PROFILE_DIR}/components" ]
 then
-    while read src
+    grep -v '^[ \t]*#' "${PROFILE_DIR}/components" | grep -v '^[ \t]*$' | while read src
     do
         COMPONENT_DIR="/OUTSIDE/components/$src"
         if [ -e "${COMPONENT_DIR}/initialize.sh" ]
         then
+            PRESERVE_DIR=$(pwd)
             source "${COMPONENT_DIR}/initialize.sh"
+            cd "${PRESERVE_DIR}"
         fi
-    done < "${PROFILE_DIR}/components"
+    done
 fi
 
 # Run the per-profile initialization script.
 if [ -e "${PROFILE_DIR}/initialize.sh" ]
 then
+    PRESERVE_DIR=$(pwd)
     source "${PROFILE_DIR}/initialize.sh"
+    cd "${PRESERVE_DIR}"
 fi
 
-# If building with the image generator...
-if [ -e "${IMAGE_BUILDER}" ]
+# Create the image with the target profile we selected in the config file.
+# We don't have parallelization or verbosity control anymore.
+# Also, the image builder is so dumb it won't remember the profile and packages
+# we used when building, so we need to recreate all that ourselves.
+# Furthermore, the packages we have built may not even match those of the profile.
+# We can't use the official repo over the internet either (that's the OpenWrt wiki "fix").
+# (Sorry for being such a hater, but... waaaay too much time wasted on this kinda crap...)
+echo -e "\nCreating image...\n"
+make info > make_info.txt
+bash -c "$(/OUTSIDE/script/guest/get_openwrt_image_builder_command_line.py)"
+
+# Copy the output files to the output directory.
+if [ -e "${PROFILE_DIR}/output" ]
 then
-
-    # Create the image with the target profile we selected in the config file.
-    # We don't have parallelization or verbosity control anymore.
-    # Also, the image builder is so dumb it won't remember the profile and packages
-    # we used when building, so we need to recreate all that ourselves.
-    # Furthermore, the packages we have built may not even match those of the profile.
-    # We can't use the official repo over the internet either (that's the OpenWrt wiki "fix").
-    # (Sorry for being such a hater, but... waaaay too much time wasted on this kinda crap...)
-    echo -e "\nCreating image...\n"
-    make info > make_info.txt
-    bash -c "$(/OUTSIDE/script/guest/get_openwrt_image_builder_command_line.py)"
-
-# If building from sources...
+    grep -v '^[ \t]*#' "${PROFILE_DIR}/output" | grep -v '^[ \t]*$' | while read src
+    do
+        # No double quotes here - we want glob expressions to be interpreted.
+        cp -r -- bin/*/$src "${OUTPUT_DIR}/firmware"
+    done
 else
-
-    # If it was a full configuration file, fix the makefile if it was generated
-    # using an older version of OpenWrt. If it was a differential configuration
-    # file, convert it to a full configuration file.
-    if [ -e "${PROFILE_DIR}/config" ]
-    then
-        make oldconfig
-    else
-        make defconfig
-    fi
-
-    # Build OpenWrt.
-    echo -e "\nCompiling...\n"
-    if (( ${VERBOSE} == 0 ))
-    then
-        make -j${MAKE_JOBS}
-    else
-        make -j1 V=s
-    fi
+    cp -r -- bin/*/* "${OUTPUT_DIR}/firmware"
 fi
 
-# Copy the output and logs to the vagrant synced directory.
-# This is done before the finalization scripts to simplify things.
-# However, if the finalization scripts fail we may have deleted a
-# previous successful build... but this is an acceptable edge case.
-if [ -e bin ] && [ $(find bin/ -maxdepth 1 -type d -printf 1 | wc -m) -eq 2 ]
+# Copy the logs to the output directory.
+if [ -e logs/ ]
 then
-    rm -fr -- "${OUTPUT_DIR}/"
-    mkdir -p "${OUTPUT_BASE_DIR}"
-    cp -r bin/*/ "${OUTPUT_DIR}/"
-    if [ -e logs/ ]
-    then
-        cp -r logs/ "${OUTPUT_DIR}/"
-    fi
-    cp .config "${OUTPUT_DIR}/config"
-else
-    mkdir -p "${OUTPUT_DIR}/"
-    cp .config "${OUTPUT_DIR}/config"
-    if [ -e logs/ ]
-    then
-        rm -fr -- "${OUTPUT_DIR}/logs/"
-        cp -r logs/ "${OUTPUT_DIR}/"
-    fi
+    cp -r logs/ "${OUTPUT_DIR}/"
 fi
->&2 echo -e "\nBuild finished."
->&2 echo "Output files stored in: bin/$1/${OUTPUT_UUID}"
+
+# Copy the makefile with some utility commands.
+cp /OUTSIDE/script/data/Makefile.build "${OUTPUT_DIR}/Makefile"
 
 # Run the after build scripts for each component.
-# The 
 # The OUTPUT_DIR variable has the pathname of the output directory.
 if [ -e "${PROFILE_DIR}/components" ]
 then
-    while read src
+    grep -v '^[ \t]*#' "${PROFILE_DIR}/components" | grep -v '^[ \t]*$' | while read src
     do
         COMPONENT_DIR="/OUTSIDE/components/$src"
         if [ -e "${COMPONENT_DIR}/finalize.sh" ]
         then
+            PRESERVE_DIR=$(pwd)
             source "${COMPONENT_DIR}/finalize.sh"
+            cd "${PRESERVE_DIR}"
         fi
-    done < "${PROFILE_DIR}/components"
+    done
 fi
 
 # Run the after build script for this profile.
 # The OUTPUT_DIR variable has the pathname of the output directory.
 if [ -e "${PROFILE_DIR}/finalize.sh" ]
 then
+    PRESERVE_DIR=$(pwd)
     source "${PROFILE_DIR}/finalize.sh"
+    cd "${PRESERVE_DIR}"
 fi
 
-# If there is no image builder, copy the one we just built.
-# We need to work around some of the problems with the image builder here.
-if [ ! -e "${IMAGE_BUILDER}" ]
-then
-    echo "Preparing the image builder..."
-
-    # We will work in a temporary subdirectory.
-    mkdir builder
-    cd builder
-
-    # Extract the OpenWrt image builder.
-    tar -xaf "$(find ${OUTPUT_DIR} -maxdepth 1 -name 'OpenWrt-ImageBuilder-*' -print -quit)"
-
-    # Fix the path problem (we want a consistent directory structure).
-    mv -- OpenWrt-ImageBuilder-*/{.[!.],}* .
-    rmdir -- OpenWrt-ImageBuilder-*
-
-    # We could copy the script generated files here too...
-    # But let's not do that, since the image builder won't work on its own anyway.
-    # Also we don't want anyone to create firmware images with duplicated keys.
-    # In the future we may want to bundle some of our scripts here for optional standalone usage.
-    #cp -r ../files .
-
-    # Re-compress the image builder inn a known location with a consistent filename.
-    tar -cjf "${OUTPUT_BASE_DIR}/builder.tar.bz2" .
-
-    # Go back to the parent directory.
-    cd ..
-
-    # No need to delete the temporary directory, since that's done immediately after this code.
-    #rm -fr builder
-fi
-
-# Delete all of the build files in the VM. This is needed to
-# free some disk space, otherwise the HD fills up too quickly
-# and builds begin to fail.
+# Delete all of the build files now that we're done.
+# Note that for failed builds all those files will still be there.
+# This is useful for debugging.
 echo "Clearing up the temporary files..."
-cd ~
+cd ..
 rm -fr -- "${SOURCE_DIR}"
 
 # Calculate how long did the build take and tell the user.
 TIMESTAMP_END=$(date +%s.%N)
 DELTA_TIME=$(echo "${TIMESTAMP_END} - ${TIMESTAMP_START}" | bc)
 DELTA_TIME_FORMATTED=$(date -u -d @0${DELTA_TIME} +"%T")
+>&2 echo -e "\n---------------------------------------------------------------------"
+>&2 echo "DONE"
+>&2 echo "---------------------------------------------------------------------"
+>&2 echo -e "\nBuild finished."
+>&2 echo "Output files stored in: bin/$1/${OUTPUT_UUID}"
 >&2 echo "Build time: ${DELTA_TIME_FORMATTED} (${DELTA_TIME} seconds)."
+

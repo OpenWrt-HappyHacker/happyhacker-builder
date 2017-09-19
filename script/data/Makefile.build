@@ -1,0 +1,29 @@
+#
+# OpenWrt Happy Hacker edition makefile
+#
+
+.SILENT:
+
+.PHONY: help flash ssh
+
+# The first target is the default target.
+# We don't want to build everything by default, we want to show the help instead.
+help:
+	echo
+	echo "The following commands are available:"
+	echo
+	echo "  make help     Show this help message."
+	echo "  make flash    Flash the firmware into a brand new ZSUN device."
+	echo "  make ssh      Get a remote shell on the device."
+	echo
+
+flash:
+	echo "Not implemented yet."
+	exit 1
+
+ssh:
+    # dbclient is part of dropbear
+	torsocks dbclient root@`cat ./keys/tor/dropbear/hostname` -i ./keys/dropbear/id_rsa
+	##torsocks ssh root@`cat ./keys/tor/dropbear/hostname`
+	exit 1
+

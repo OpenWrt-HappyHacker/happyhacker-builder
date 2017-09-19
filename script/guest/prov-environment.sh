@@ -40,6 +40,10 @@ fi
 ./scripts/feeds update -a 2>&1
 ./scripts/feeds install -a 2>&1
 
+# Delete the git repository data.
+# This saves over a hundred megabytes of data, plus it makes everything faster.
+rm -fr .git/
+
 # Make a tarfile with a cache of the original code.
 # That way we don't need to checkout the repository again on each build.
 if [ -e "${TAR_FILE}" ]

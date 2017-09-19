@@ -40,31 +40,26 @@ lxd)
 docker)
   command -v docker >/dev/null 2>&1 || { echo >&2 "The 'docker' command is required but not installed. Aborting..."; exit 1; }
 
-  # Fix the SSH key permissions, because Git does not preserve them.
-  chmod 400 -- ./script/data/builder-keys/*
+  # Make sure the Docker service is running.
+  sudo systemctl start docker
 
-  # Create the base image if it doesn't exist.
-  if [[ "$(docker images -q $CNT_TP 2> /dev/null)" == "" ]]
+  # If the container is not running...
+  if [ ! "$(sudo docker ps -q -f name=${CNT_NM})" ]
   then
-    docker build -t $CNT_TP .
+
+     # If the container does not exist...
+    if [ ! "$(sudo docker ps -aq -f name=${CNT_NM})" ]
+    then
+
+        # Create the container.
+        script/host/docker_create_container.sh
+
+    else
+
+        # If it exists, start it.
+        sudo docker start $CNT_NM
+    fi
   fi
-
-  # If not it's running, run it.
-  if [ ! "$(docker ps -q -f name=${CNT_NM})" ] || [ ! "$(docker ps -aq -f status=running -f name=${CNT_NM})" ]
-  then
-    docker run --privileged \
-               -e "container=docker" \
-               -e "TERM=xterm-256color" \
-               -p 22222:22 \
-               --hostname $CNT_NM \
-               --name $CNT_NM \
-               -v /DinD/vagrant-happyhacker:/vagrant \
-               -d $CNT_TP
-
-  # Restart sshd
-  docker exec $CNT_NM systemctl restart sshd
-  fi
-
   ;;
 
 #-----------------------------------------------------------------------------

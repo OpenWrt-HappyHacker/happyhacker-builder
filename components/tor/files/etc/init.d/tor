@@ -1,0 +1,38 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006-2011 OpenWrt.org
+
+START=98
+STOP=89
+
+USE_PROCD=1
+
+start_service() {
+	[ -f /var/run/tor.pid ] || {
+		touch /var/run/tor.pid
+		chown tor:tor /var/run/tor.pid
+	}
+	[ -d /var/lib/tor ] || {
+		mkdir -m 0755 -p /var/lib/tor
+		chmod 0700 /var/lib/tor
+		chown tor:tor /var/lib/tor
+	}
+	[ -d /var/log/tor ] || {
+		mkdir -m 0755 -p /var/log/tor
+		chown tor:tor /var/log/tor
+	}
+
+	# --- OpenWrt HappyHacker patch ---
+        DATADIR=/mnt/sda1/tor-data
+	mkdir -p "$DATADIR"
+	chown tor:tor "$DATADIR"
+	chmod 700 "$DATADIR"
+	chown tor:tor /etc/tor -R
+	chmod 700 /etc/tor -R
+	chmod 440 /etc/tor/lib/hidden_service/*/*
+        ntpd -q -n -p time.apple.com
+	# --- OpenWrt HappyHacker patch ---
+
+	procd_open_instance
+	procd_set_param command /usr/sbin/tor --runasdaemon 0
+	procd_close_instance
+}

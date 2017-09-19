@@ -1,7 +1,15 @@
 #!/bin/sh
 
-chmod 777 /tmp_php_*
-chmod 766 -R /www/storage-jirafeau@usb/
-chmod 755 -R /www/WEBtor/
+mkdir -p /mnt/sda1/jirafeau/files
+mkdir -p /mnt/sda1/jirafeau/links
+mkdir -p /mnt/sda1/jirafeau/async
+mkdir -p /mnt/sda1/jirafeau/alias
+mkdir -p /mnt/sda1/jirafeau/static
+mkdir -p /mnt/sda1/tmp/jirafeau
+
+chmod 777 -R /mnt/sda1/tmp/
+chmod 766 -R /mnt/sda1/jirafeau/
+chmod 755 -R /www/jirafeau/
 
 exit 0
+

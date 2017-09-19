@@ -31,15 +31,7 @@ lxd)
 
 # When using Docker.
 docker)
-
-  # Make sure the write permissions for the container are correct.
-  # ./script must be written to as it contains the CA keys.
-  # ./bin will contain the build output.
-  chmod 777 ./script
-  chmod 777 ./bin
-  chmod 777 $(find ./bin -type d)
-
-  ssh -oStrictHostKeyChecking=no vagrant@127.0.0.1 -p 22222 -i ./script/data/builder-keys/ssh.priv /vagrant/script/guest/build.sh \"$1\"
+  sudo docker exec -it $CNT_NM su $_user -c sh -c "/OUTSIDE/script/guest/build.sh \"$1\""
   ;;
 
 *)

@@ -1,5 +1,5 @@
 # Server configuration
-config uhttpd 'WEBtor'
+config uhttpd 'jirafeau'
 
 	# HTTP listen addresses, multiple allowed
 #	list listen_http	0.0.0.0:80
@@ -10,7 +10,7 @@ config uhttpd 'WEBtor'
 #	list listen_https	[::]:443
 
 	# Server document root
-	option home		/www/WEBtor
+	option home		/www/jirafeau/
 
 	# Reject requests from RFC1918 IP addresses
 	# directed to the servers public IP(s).

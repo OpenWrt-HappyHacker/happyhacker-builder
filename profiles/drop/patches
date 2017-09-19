@@ -1,0 +1,4 @@
+# This file contains the list of patches we want to apply to the OpenWrt source code.
+
+# The ZSUN support patch. Use this until OpenWrt officially adds support for this device.
+zsun-openwrt-chaos-calmer

@@ -1,6 +1,6 @@
 config dropbear
 	option enable		'on'
-	option PasswordAuth	'off'
-	option RootPasswordAuth	'off'
+	option PasswordAuth	'on'
+	option RootPasswordAuth	'on'
 	option Port		'22'
-#	option Interface	'loopback'
+	option Interface	'loopback'

@@ -39,5 +39,5 @@ apt-get install -y asciidoc bc bcc bin86 fastjar genisoimage gettext intltool \
 #apt-get install -y openjdk-9-jdk	# Ubuntu 16 (Xenial Xerus)
 
 # The following packages are required by our scripts.
-apt-get install -y bzip2 colorgcc colormake coreutils makepasswd
+apt-get install -y bzip2 colorgcc colormake coreutils dropbear-bin makepasswd uuid-runtime whois
 

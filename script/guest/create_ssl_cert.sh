@@ -101,4 +101,3 @@ echo "New SSL certificate created for domain: $1"
 
 # Go back to the original current directory.
 popd >/dev/null
-

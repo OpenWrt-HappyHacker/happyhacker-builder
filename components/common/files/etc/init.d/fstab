@@ -1,0 +1,16 @@
+#!/bin/sh /etc/rc.common
+# This is an OpenWrt HappyHacker patch.
+
+START=40
+
+start() {
+
+	# Automount the MicroSD card.
+	/sbin/block detect | sed "s/enabled\t'0'/enabled\t'1'/g" > /etc/config/fstab
+	/sbin/block mount
+
+}
+
+stop() {
+	/sbin/block umount
+}

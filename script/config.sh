@@ -12,7 +12,7 @@
 
 # Set the sandbox (virtualization/container) provider.
 # Valid values are "none", "docker", "lxd" and "vagrant".
-SANDBOX_PROVIDER="vagrant"
+SANDBOX_PROVIDER="lxd"
 
 # Number of parallel Make jobs. If ommitted it will default to the number of
 # cores (NUM_CORES). In our tests OpenWrt wouldn't build correctly in parallel
@@ -37,6 +37,8 @@ CNT_TG='HHv1' # container version tag
 CNT_USR='maker'
 CNT_USR_HOME="/home/$CNT_USR"
 CNT_SHAREPATH='/OUTSIDE'
+
+CNT_SSHD=0 # 1:enable/0:disable sshd support
 
 HST_BASEDIR="$(pwd)"
 #HST_SHAREPATH="$HST_BASEDIR/INSIDE"
@@ -95,6 +97,11 @@ VM_MEMORY=8192
 # Advanced build settings.
 #------------------------------------------------------------------------------#
 
+# Enable the debug mode.
+# This is used internally by the developers, you probably don't need it.
+DEBUG_MODE=0
+##DEBUG_MODE=1
+
 # Directory where build files will be written to temporarily.
 # Contents may be deleted when the build is finished.
 # Normally you never need to change this.
@@ -103,6 +110,21 @@ BUILD_BASEDIR="/INSIDE"
 # Cache where the original, unmodified OpenWrt source code will be kept.
 # Normally you never need to change this.
 TAR_FILE="/INSIDE/openwrt.tar.bz2"
+
+#------------------------------------------------------------------------------#
+# Device Settings.
+#------------------------------------------------------------------------------#
+
+# Root password for the device.
+# You should probably change this. :)
+#ROOT_PASSWORD="a zueira nao tem fin"
+ROOT_PASSWORD="toor"
+
+# Location of the CSV file with the WiFi SSIDs and passwords.
+# The first line of the file is ignored, everything else is a list of
+# wireless network IDs and passwords. The device will try to connect to
+# these automatically when it boots.
+WIFIDB="/OUTSIDE/script/data/wifisdb.csv"
 
 #------------------------------------------------------------------------------#
 # SSL/TLS certificate settings.
@@ -140,7 +162,7 @@ CA_CERT_EMAIL="crapula@alligatorcon.pl"
 # Optional passphrase to encrypt the private key.
 # Leave empty to disable (this is less secure!).
 # Comment out to prompt the user during the build.
-SSH_PASSPHRASE="alligator"
+SSH_PASSPHRASE="a zueira nao tem fin"
 
 # Key type and length, and filename. Normally you don't need to change this.
 # If you're extra paranoid, try increasing the RSA key size to 4096.

@@ -1,0 +1,24 @@
+# This is the list of components to add to this profile.
+#
+# Be careful, the order matters! In general:
+#   1) Put the "common" component first, always.
+#   2) Put the daemon components (dropbear, tor, etc.)
+#   3) Put the application components (jirafeau, etc.)
+#
+# That way the daemons can use the settings and files from "common",
+# and the applications can use the settings and files from the daemons.
+
+# Common component. Always goes first.
+common
+
+# Enable the WiFi Manager, this connects the device to the internet.
+wm
+
+# Enable the tor daemon, all communications will go through here.
+tor
+
+# Enable the dropbear SSH daemon, so we can remotely manage the device.
+dropbear
+
+# Enable the jirafeau web application.
+jirafeau

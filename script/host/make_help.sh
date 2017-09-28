@@ -9,7 +9,7 @@ To list the available profiles:
 To build a specific profile:
     make bin/<profile>
 
-To clean the build files (but not the VM or output files):
+To clean the output files (but not the container/VM):
     make clean
 
 To completely clean up everything
@@ -22,10 +22,10 @@ To begin preparing a new profile from scratch:
 To modify the OpenWrt configuration for an existing profile:
     make menuconfig CONFIG=<profile>
 
-To quickly SSH into the build contianer/VM:
+To quickly SSH into the build container/VM:
     make ssh
 
-To control the build container:
+To control the build container/VM:
     make up
     make suspend
     make destroy

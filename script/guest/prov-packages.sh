@@ -39,5 +39,13 @@ apt-get install -y asciidoc bc bcc bin86 fastjar genisoimage gettext intltool \
 #apt-get install -y openjdk-9-jdk	# Ubuntu 16 (Xenial Xerus)
 
 # The following packages are required by our scripts.
-apt-get install -y bzip2 colorgcc colormake coreutils dropbear-bin makepasswd uuid-runtime whois
+apt-get install -y bzip2 colorgcc colormake coreutils makepasswd uuid-runtime whois
+
+# The dropbear package changes its name depending on the Ubuntu version.
+if [[ $(apt-cache search dropbear-bin | wc -l) == 1 ]]
+then
+    apt-get install -y dropbear-bin
+else
+    apt-get install -y dropbear
+fi
 

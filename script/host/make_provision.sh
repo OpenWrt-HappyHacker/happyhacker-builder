@@ -23,7 +23,6 @@ vagrant)
 
 # When using LXD.
 lxd)
-  source ./script/host/lxd_sync_host_to_guest.sh
   lxc exec "${LXD_CONTAINER_NAME}" /OUTSIDE/script/guest/prov-lxd.sh
   ;;
 

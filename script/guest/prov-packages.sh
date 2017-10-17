@@ -49,3 +49,9 @@ else
     apt-get install -y dropbear
 fi
 
+# Old versions of Ubuntu didn't have the "realpath" command by default.
+if [[ $(which realpath | wc -l) == 0 ]]
+then
+    apt-get install -y realpath
+fi
+

@@ -23,7 +23,7 @@ none)
 #-----------------------------------------------------------------------------
 # When using Vagrant.
 vagrant)
-  command -v foo >/dev/null 2>&1 || { echo >&2 "The 'vagrant' command is required but not installed. Aborting..."; exit 1; }
+  command -v vagrant >/dev/null 2>&1 || { echo >&2 "The 'vagrant' command is required but not installed. Aborting..."; exit 1; }
   vagrant up
   ;;
 

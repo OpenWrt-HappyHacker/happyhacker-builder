@@ -22,5 +22,6 @@ then
     echo "Setting root password for the device..."
     ##echo "Root password is: '${ROOT_PASSWORD}'"         # XXX DEBUG
     /OUTSIDE/script/guest/fetch_default_file.sh base-files /etc/shadow
-    gawk -i inplace -F: -v string=$(mkpasswd "${ROOT_PASSWORD}") 'BEGIN{OFS=":"}/root/{gsub(/.*/,string,$2)}1' ./files/etc/shadow
+    ROOT_PASSWORD_HASH=$(mkpasswd "${ROOT_PASSWORD}")
+    echo "$(gawk -F: -v string=${ROOT_PASSWORD_HASH} 'BEGIN{OFS=":"}/root/{gsub(/.*/,string,$2)}1' ./files/etc/shadow)" > ./files/etc/shadow 
 fi

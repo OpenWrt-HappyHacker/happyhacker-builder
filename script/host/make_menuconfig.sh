@@ -34,6 +34,12 @@ docker)
   ssh -oStrictHostKeyChecking=no vagrant@127.0.0.1 -p 22222 -i ./script/builder-keys/ssh.priv /vagrant/script/guest/menuconfig.sh \"$1\"
   ;;
 
+# Remind the user to configure the build system.
+error)
+  echo "You must edit the script/config.sh file before using the builder."
+  exit 1
+  ;;
+
 *)
   echo "Error! Unknown sandbox provider ${SANDBOX_PROVIDER}"
   exit 1

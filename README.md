@@ -57,14 +57,50 @@ There's also an option to disable sandboxing completely, in which case all the r
 
 If you choose to use Vagrant and Virtualbox, we recommend installing both from their respective web pages, since distro maintainers for some distros tend to either keep really old, buggy versions (\*ahem\* Debian \*ahem\*) or be misconfigured (\*ahem\* Fedora \*ahem\*).
 
-For example, your setup on Debian will be something like this:
+For example, your setup on Ubuntu with LXD will be something like this (DO NOT BLINDLY COPY AND PASTE ON YOUR SHELL, READ IT FIRST):
+
+```
+sudo apt-get update
+sudo apt-get install -y git make lxd
+git clone https://github.com/OpenWrt-HappyHacker/happyhacker-builder.git
+cd happyhacker-builder
+vi script/config.sh    # don't be lazy, read all settings ;)
+vi script/data/wifisdb.csv   # same here, pay attention to it
+make all
+```
+
+On Debian with Vagrant it would look like this (AGAIN, DO NOT COPY AND PASTE, READ IT FIRST):
+
+```
+sudo apt-get update
+sudo apt-get install -y git make vagrant virtualbox
+git clone https://github.com/OpenWrt-HappyHacker/happyhacker-builder.git
+cd happyhacker-builder
+vi script/config.sh    # don't be lazy, read all settings ;)
+vi script/data/wifisdb.csv   # same here, pay attention to it
+make all
+```
+
+On Debian with Docker it may be something like this (do bear in mind Docker support is currently experimental):
 
 ```
 sudo apt-get update
 sudo apt-get install -y git make docker
-git clone https://github.com/OpenWrt-HappyHacker/vagrant-happyhacker.git
-cd vagrant-happyhacker
+git clone https://github.com/OpenWrt-HappyHacker/happyhacker-builder.git
+cd happyhacker-builder
 vi script/config.sh    # don't be lazy, read all settings ;)
+vi script/data/wifisdb.csv   # same here, pay attention to it
+make all
+```
+
+And if you just prefer to set up your own sandbox (or run Ubuntu 16 in bare metal), try something like this:
+```
+sudo apt-get update
+sudo apt-get install -y git make
+git clone https://github.com/OpenWrt-HappyHacker/happyhacker-builder.git
+cd happyhacker-builder
+vi script/config.sh    # don't be lazy, read all settings ;)
+vi script/data/wifisdb.csv   # same here, pay attention to it
 make all
 ```
 

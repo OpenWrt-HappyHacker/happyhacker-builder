@@ -38,6 +38,12 @@ docker)
   RRUN $_cnt_nm 'sh'
   ;;
 
+# Remind the user to configure the build system.
+error)
+  echo "You must edit the script/config.sh file before using the builder."
+  exit 1
+  ;;
+
 *)
   echo "Error! Unknown sandbox provider ${SANDBOX_PROVIDER}"
   exit 1

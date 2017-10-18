@@ -45,10 +45,6 @@ Here is a handy link to DealExtreme. This is the cheapest one we found, most oth
 
   http://www.dx.com/p/zsun-wi-fi-usb-2-0-card-reader-for-tablet-pc-ipad-iphone-android-mobile-phone-black-379018
 
-* How do I flash a new firmware image?
-
-There is a flashing script in [script/install.sh](script/install.sh). Check out the comments at the beginning for precise instructions on how to use it.
-
 * How do I compile a new firmware image?
 
 You'll need a Linux machine (any distro is fine), an active Internet connection. Everything is built inside a sandbox, to better take care of dependencies and remove OS quirks. We support using either Vagrant and VirtualBox, LXD containers or Docker containers. We use Vagrant or LXD for building locally in our laptops and Docker for our build server, but it's up to you. By default it is configured to use Vagrant.
@@ -117,6 +113,20 @@ The build VM is configured to use 4 Gb of RAM and 1 CPU core. This is rather con
 Note that the build system requires an active Internet connection, not only during provisioning of the VM but during the compilation process itself. Also, the build system was only tested against GNU Make, we do not know how well it would work on other versions of Make, if at all.
 
 Regarding multibuilds: currently we have very, very limited support for this. When using Vagrant you can get away with building two different profiles in parallel, bot not the same profile. With Docker it will not work at all. We may add support for this in the future but for now, just one build at a time.
+
+* How do I flash a new firmware image?
+
+The bin/ directory contains each and every build of the firmware images. Pick one, you'll need the .bin files.
+
+There is a flashing script in [script/install.sh](script/install.sh). Check out the comments at the beginning for precise instructions on how to use it.
+
+* Ok, I flashed it, what now?
+
+Hopefully, you didn't forget to set the Wi-Fi credentials :D but if you did, there are default ones too. Set up an AP so the device can connect to it, plug it on somewhere and wait a while (could be several minutes for the first boot).
+
+The device will have an SSH daemon over Tor. You'll need the Dropbear client to connect to it.
+
+In the output folder for your build you will find a makefile, with the "make ssh" command you can connect to the device using Tor and Dropbear. Also try typing "make help" to see what else you can do with it.
 
 * I tried compiling but it says compilation failed. What gives?
 

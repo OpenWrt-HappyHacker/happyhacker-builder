@@ -2959,6 +2959,7 @@ CONFIG_PACKAGE_php5-fastcgi=y
 # CONFIG_PACKAGE_php5-mod-gmp is not set
 # CONFIG_PACKAGE_php5-mod-hash is not set
 # CONFIG_PACKAGE_php5-mod-iconv is not set
+# CONFIG_PACKAGE_php5-mod-intl is not set
 # CONFIG_PACKAGE_php5-mod-json is not set
 # CONFIG_PACKAGE_php5-mod-ldap is not set
 # CONFIG_PACKAGE_php5-mod-mbstring is not set
@@ -3248,7 +3249,6 @@ CONFIG_PACKAGE_libpolarssl=y
 # CONFIG_PACKAGE_libpjsua2 is not set
 # CONFIG_PACKAGE_libre is not set
 # CONFIG_PACKAGE_librem is not set
-# CONFIG_PACKAGE_libresample is not set
 # CONFIG_PACKAGE_libspandsp is not set
 # CONFIG_PACKAGE_libsrtp is not set
 
@@ -3293,7 +3293,7 @@ CONFIG_PACKAGE_libpolarssl=y
 # CONFIG_PACKAGE_libbfd is not set
 CONFIG_PACKAGE_libblkid=y
 CONFIG_PACKAGE_libblobmsg-json=y
-# CONFIG_PACKAGE_libcap is not set
+CONFIG_PACKAGE_libcap=y
 # CONFIG_PACKAGE_libcares is not set
 # CONFIG_PACKAGE_libcharset is not set
 # CONFIG_PACKAGE_libconfig is not set
@@ -3530,13 +3530,13 @@ CONFIG_LUCI_SRCDIET=y
 #
 # Translations
 #
+# CONFIG_LUCI_LANG_uk is not set
 # CONFIG_LUCI_LANG_hu is not set
 # CONFIG_LUCI_LANG_pt is not set
-# CONFIG_LUCI_LANG_sk is not set
 # CONFIG_LUCI_LANG_ro is not set
 # CONFIG_LUCI_LANG_en is not set
 # CONFIG_LUCI_LANG_pl is not set
-# CONFIG_LUCI_LANG_uk is not set
+# CONFIG_LUCI_LANG_sk is not set
 # CONFIG_LUCI_LANG_ru is not set
 # CONFIG_LUCI_LANG_vi is not set
 # CONFIG_LUCI_LANG_de is not set
@@ -4349,8 +4349,9 @@ CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_tcpdump-mini is not set
 # CONFIG_PACKAGE_tgt is not set
 CONFIG_PACKAGE_tor=y
-# CONFIG_PACKAGE_tor-fw-helper is not set
+# CONFIG_PACKAGE_tor-gencert is not set
 # CONFIG_PACKAGE_tor-geoip is not set
+# CONFIG_PACKAGE_tor-resolve is not set
 # CONFIG_PACKAGE_uclient-fetch is not set
 # CONFIG_PACKAGE_udpxy is not set
 # CONFIG_PACKAGE_ulogd is not set

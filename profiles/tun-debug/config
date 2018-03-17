@@ -3089,7 +3089,6 @@ CONFIG_PACKAGE_libpolarssl=y
 # CONFIG_PACKAGE_libpjsua2 is not set
 # CONFIG_PACKAGE_libre is not set
 # CONFIG_PACKAGE_librem is not set
-# CONFIG_PACKAGE_libresample is not set
 # CONFIG_PACKAGE_libspandsp is not set
 # CONFIG_PACKAGE_libsrtp is not set
 
@@ -3370,28 +3369,28 @@ CONFIG_LUCI_SRCDIET=y
 #
 # Translations
 #
+# CONFIG_LUCI_LANG_uk is not set
 # CONFIG_LUCI_LANG_hu is not set
 # CONFIG_LUCI_LANG_pt is not set
-# CONFIG_LUCI_LANG_no is not set
-# CONFIG_LUCI_LANG_sk is not set
-# CONFIG_LUCI_LANG_pl is not set
-# CONFIG_LUCI_LANG_uk is not set
-# CONFIG_LUCI_LANG_ja is not set
-# CONFIG_LUCI_LANG_vi is not set
-# CONFIG_LUCI_LANG_he is not set
 # CONFIG_LUCI_LANG_ro is not set
-# CONFIG_LUCI_LANG_pt-br is not set
+# CONFIG_LUCI_LANG_en is not set
+# CONFIG_LUCI_LANG_pl is not set
+# CONFIG_LUCI_LANG_sk is not set
+# CONFIG_LUCI_LANG_ru is not set
+# CONFIG_LUCI_LANG_vi is not set
+# CONFIG_LUCI_LANG_de is not set
+# CONFIG_LUCI_LANG_no is not set
 # CONFIG_LUCI_LANG_ms is not set
 # CONFIG_LUCI_LANG_zh-cn is not set
-# CONFIG_LUCI_LANG_de is not set
+# CONFIG_LUCI_LANG_he is not set
 # CONFIG_LUCI_LANG_zh-tw is not set
 # CONFIG_LUCI_LANG_tr is not set
 # CONFIG_LUCI_LANG_sv is not set
-# CONFIG_LUCI_LANG_ru is not set
+# CONFIG_LUCI_LANG_ja is not set
 # CONFIG_LUCI_LANG_el is not set
 # CONFIG_LUCI_LANG_ca is not set
-# CONFIG_LUCI_LANG_en is not set
 # CONFIG_LUCI_LANG_es is not set
+# CONFIG_LUCI_LANG_pt-br is not set
 # CONFIG_LUCI_LANG_cs is not set
 # CONFIG_LUCI_LANG_fr is not set
 # CONFIG_LUCI_LANG_it is not set
@@ -4554,4 +4553,3 @@ CONFIG_PACKAGE_uboot-envtools=y
 # CONFIG_PACKAGE_yanglint is not set
 # CONFIG_PACKAGE_yunbridge is not set
 # CONFIG_PACKAGE_zsh is not set
-CONFIG_OVERRIDE_PKGS="libnetfilter-cthelper libnetfilter-cttimeout libnetfilter-queue"

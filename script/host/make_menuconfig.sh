@@ -52,7 +52,7 @@ docker)
 
 # Remind the user to configure the build system.
 error)
-  echo "You must edit the script/config.sh file before using the builder."
+  echo "You must create a config/user.ymlfile before using the builder."
   exit 1
   ;;
 

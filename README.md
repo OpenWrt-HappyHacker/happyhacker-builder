@@ -60,8 +60,9 @@ sudo apt-get update
 sudo apt-get install -y git make lxd
 git clone https://github.com/OpenWrt-HappyHacker/happyhacker-builder.git
 cd happyhacker-builder
-vi script/config.sh    # don't be lazy, read all settings ;)
-vi script/data/wifisdb.csv   # same here, pay attention to it
+echo "SANDBOX:"         > config/user.yml
+echo "  PROVIDER: lxd" >> config/user.yml
+vi config/wifisdb.csv                         # IMPORTANT add the WiFi networks here
 make all
 ```
 
@@ -72,8 +73,9 @@ sudo apt-get update
 sudo apt-get install -y git make vagrant virtualbox
 git clone https://github.com/OpenWrt-HappyHacker/happyhacker-builder.git
 cd happyhacker-builder
-vi script/config.sh    # don't be lazy, read all settings ;)
-vi script/data/wifisdb.csv   # same here, pay attention to it
+echo "SANDBOX:"             > config/user.yml
+echo "  PROVIDER: vagrant" >> config/user.yml
+vi config/wifisdb.csv                         # IMPORTANT add the WiFi networks here
 make all
 ```
 
@@ -84,8 +86,9 @@ sudo apt-get update
 sudo apt-get install -y git make docker
 git clone https://github.com/OpenWrt-HappyHacker/happyhacker-builder.git
 cd happyhacker-builder
-vi script/config.sh    # don't be lazy, read all settings ;)
-vi script/data/wifisdb.csv   # same here, pay attention to it
+echo "SANDBOX:"            > config/user.yml
+echo "  PROVIDER: docker" >> config/user.yml
+vi config/wifisdb.csv                         # IMPORTANT add the WiFi networks here
 make all
 ```
 
@@ -95,8 +98,9 @@ sudo apt-get update
 sudo apt-get install -y git make
 git clone https://github.com/OpenWrt-HappyHacker/happyhacker-builder.git
 cd happyhacker-builder
-vi script/config.sh    # don't be lazy, read all settings ;)
-vi script/data/wifisdb.csv   # same here, pay attention to it
+echo "SANDBOX:"          > config/user.yml
+echo "  PROVIDER: none" >> config/user.yml
+vi config/wifisdb.csv                         # IMPORTANT add the WiFi networks here
 make all
 ```
 

@@ -49,8 +49,6 @@
 ##
 #####
 
-# TODO: the work directory should have a randomized name.
-
 # Set the error mode so the script fails automatically if any command in it fails.
 # This saves us a lot of error checking code down below.
 set -e
@@ -118,7 +116,7 @@ mkdir -p "${OUTPUT_DIR}/keys"
 
 # Create the source directory where we will build the image, and switch to it.
 mkdir -p "${BUILD_BASEDIR}/"
-WORK_DIR="${BUILD_BASEDIR}/$1"
+WORK_DIR="${BUILD_BASEDIR}/${OUTPUT_UUID}"
 cd ~
 if [ -e "${WORK_DIR}" ]
 then

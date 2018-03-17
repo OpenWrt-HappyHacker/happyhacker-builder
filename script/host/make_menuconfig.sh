@@ -4,6 +4,22 @@
 # This saves us a lot of error checking code down below.
 set -e
 
+# Check the command line arguments.
+if (( $# < 1 ))
+then
+    >&2 echo "Error: missing profile name"
+    >&2 echo
+    >&2 echo "Usage:"
+    >&2 echo "  make menuconfig CONFIG=<profile>"
+    >&2 echo
+    exit 1
+fi
+if (( $# > 1 ))
+then
+    >&2 echo "Error: too many arguments provided"
+    exit 1
+fi
+
 # Load the build configuration variables.
 source script/config.sh
 

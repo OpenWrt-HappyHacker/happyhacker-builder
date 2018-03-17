@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# This script creates the private key and .onion hostname for a hidden service.
+# This script creates the private key and .onion hostname for a legacy hidden service.
 
 # Set the error mode to fail on any command.
 set -e
 
 # Show a message so the user knows what's going on.
-echo "Generating Tor hidden service keys..."
+echo "Generating Tor legacy hidden service keys..."
 
 # Generate the RSA private key in PEM format for the hidden service.
 openssl genrsa -out "$1/private_key" 1024

@@ -12,7 +12,7 @@
 # Set the sandbox (virtualization/container) provider.
 # Valid values are "none", "docker", "lxd" and "vagrant".
 # The special value "error" will cause an error to remind you to edit this. :)
-SANDBOX_PROVIDER="error"
+SANDBOX_PROVIDER="lxd"
 
 # Number of parallel Make jobs. If ommitted it will default to the number of
 # cores (NUM_CORES). In our tests OpenWrt wouldn't build correctly in parallel
@@ -117,10 +117,6 @@ DEBUG_MODE=0
 # Contents may be deleted when the build is finished.
 # Normally you never need to change this.
 BUILD_BASEDIR="/INSIDE"
-
-# Cache where the original, unmodified OpenWrt source code will be kept.
-# Normally you never need to change this.
-TAR_FILE="/INSIDE/openwrt.tar.bz2"
 
 #------------------------------------------------------------------------------#
 # Device Settings.

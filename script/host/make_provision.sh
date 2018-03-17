@@ -13,6 +13,8 @@ case "${SANDBOX_PROVIDER}" in
 # When not using a sandbox.
 none)
   # The "host" is the "guest" now.
+  echo "Provisioning your machine. This may trigger a sudo prompt."
+  echo "This will install several packages on your machine\!"
   sudo ./script/host/prov-no-sandbox.sh $(id -un) $(id -gn)
   ;;
 

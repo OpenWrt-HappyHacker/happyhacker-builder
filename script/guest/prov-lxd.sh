@@ -44,10 +44,6 @@ source /OUTSIDE/script/guest/prov-packages.sh
 # This script runs as an unprivileged user.
 su ${LXD_INSIDE_USER} -c /OUTSIDE/script/guest/prov-lxd-user.sh
 
-# Setup the build environment.
-# This script runs as an unprivileged user.
-su ${LXD_INSIDE_USER} -c /OUTSIDE/script/guest/prov-environment.sh
-
 # Mark the container as provisioned.
 touch /.provisioned
 

@@ -1,0 +1,1 @@
+These scripts are run internally by the build system outside the container, that is, in your host machine. You do not need to run them or change them at all. but feel free to read them if you're interested in learning what's under the hood.

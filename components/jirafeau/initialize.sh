@@ -26,3 +26,5 @@ sed -i -r s/\(https?:\\/\\/\)\[^\\/]+/\\1${ONION_HOSTNAME}/g ./files/www/jirafea
 # Sed doesn't exit with an error condition if the pattern was not found.
 grep -qF ${ONION_HOSTNAME} ./files/www/jirafeau/lib/config.local.php
 
+# Add the SD card filesystem fixes we need.
+cat /OUTSIDE/components/jirafeau/sdcard_fixes >> ./files/etc/sdcard_fixes.sh

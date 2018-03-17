@@ -10,6 +10,8 @@
 # The files are laid out like this (all are optional unless specified):
 #
 #   bin/{profile}/*                       This is where the output files will be written
+#   bin/builder-*.tar.bz2                 Cached precompiled binaries
+#   bin/source-*.tar.bz2                  Cached OpenWrt source code
 #
 #   profiles/{profile}/config             OpenWrt makefile configuration, this is mandatory
 #   profiles/{profile}/diffconfig         Differential configuration file, only used if config is missing
@@ -25,7 +27,7 @@
 #   components/{component}/initialize.sh  Initialization script for this component
 #   components/{component}/finish.sh      Post build customization script for this component
 #
-#   patches/{patch}.diff                  Diff-style patch for the OpenWrt source code to be applied
+#   patches/{patch}.patch                 Git formatted patch for the OpenWrt source code to be applied
 #
 # The build script will begin by copying the OpenWrt makefile configuration into the VM. Then the components file is parsed to get the list of components. For
 # each component, its files are copied into the VM as well to be included in the device filesystem. The order of the files is the same as the order in the
@@ -46,6 +48,8 @@
 #
 ##
 #####
+
+# TODO: the work directory should have a randomized name.
 
 # Set the error mode so the script fails automatically if any command in it fails.
 # This saves us a lot of error checking code down below.
@@ -114,27 +118,73 @@ mkdir -p "${OUTPUT_DIR}/keys"
 
 # Create the source directory where we will build the image, and switch to it.
 mkdir -p "${BUILD_BASEDIR}/"
-SOURCE_DIR="${BUILD_BASEDIR}/$1"
+WORK_DIR="${BUILD_BASEDIR}/$1"
 cd ~
-if [ -e "${SOURCE_DIR}" ]
+if [ -e "${WORK_DIR}" ]
 then
-    rm -fr -- "${SOURCE_DIR}/"
+    rm -fr -- "${WORK_DIR}/"
 fi
-mkdir "${SOURCE_DIR}"
-cd "${SOURCE_DIR}"
+mkdir "${WORK_DIR}"
+cd "${WORK_DIR}"
+
+# Get a hash of the compile configuration.
+# This should encompass everything that, if changed, will force us to recompile.
+BUILDER_ID=$(echo "${REPO_URL}"@"${REPO_COMMIT}" | cat "${PROFILE_DIR}/config" "${PROFILE_DIR}/patches" - | md5sum | cut -d ' ' -f 1)
+echo "OpenWrt Builder ID: ${BUILDER_ID}"
 
 # If the image generator was not compiled yet, compile it.
 # This may take a very long time (about half an hour in a good laptop).
-IMAGE_BUILDER="${OUTPUT_BASE_DIR}/builder.tar.bz2"
+IMAGE_BUILDER="/OUTSIDE/bin/builder-${BUILDER_ID}.tar.bz2"
 if [ -e "${IMAGE_BUILDER}" ]
 then
-    echo "Image generator found at: ${IMAGE_BUILDER}"
+    echo "Image generator found."
 else
     echo "No image generator found, building from sources."
 
-    # Get the OpenWrt source code.
-    echo "Fetching source code from cache..."
-    tar -xaf "${TAR_FILE}"
+    # Get the name of the source code cache.
+    SOURCE_ID=$(echo "${REPO_URL}"@"${REPO_COMMIT}" | md5sum | cut -d ' ' -f 1)
+    TAR_FILE="/OUTSIDE/bin/source-${SOURCE_ID}.tar.bz2"
+
+    # If the source code was already downloaded, use it.
+    if [ -f "${TAR_FILE}" ]
+    then
+        echo "Fetching source code from cache..."
+        tar -xaf "${TAR_FILE}"
+
+    # If not, download it from the git repository.
+    else
+        echo "Downloading the source code from the repository..."
+
+        # Clone the OpenWrt source code.
+        git clone --progress "${REPO_URL}" . 2>&1
+
+        # If a code freeze is requested, go to that commit.
+        if [ -z ${REPO_COMMIT+x} ]
+        then
+            echo "Using latest commit."
+        else
+            echo "Freezing code to commit: ${REPO_COMMIT}"
+            git reset --hard "${REPO_COMMIT}"
+        fi
+
+        # Download and install the feeds.
+        ./scripts/feeds update -a 2>&1
+        ./scripts/feeds install -a 2>&1
+
+        # Delete the git repository data.
+        # This saves over a hundred megabytes of data, plus it makes everything faster.
+        rm -fr .git/
+
+        # Make a tarfile with a cache of the original code.
+        # That way we don't need to checkout the repository again on each build.
+        if [ -e "${TAR_FILE}" ]
+        then
+            rm -- "${TAR_FILE}"
+        fi
+        tar -caf "${TAR_FILE}" .
+    fi
+
+    # We already have the code, now let's customize it.
     echo -e "Applying customizations...\n"
 
     # Apply the OpenWrt patches.
@@ -142,9 +192,9 @@ else
     then
         grep -v '^[ \t]*#' "${PROFILE_DIR}/patches" | grep -v '^[ \t]*$' | while read p
         do
-            if [ -e "/OUTSIDE/patches/$p.diff" ]
+            if [ -e "/OUTSIDE/patches/$p.patch" ]
             then
-                git apply -v "/OUTSIDE/patches/$p.diff"
+                git apply -v "/OUTSIDE/patches/$p.patch"
             fi
         done
     fi
@@ -164,7 +214,7 @@ else
     fi
 
     # Delete the temporary files.
-    # If we miss this step, sometimes make behaves strangely.
+    # If we miss this step, sometimes the 'make' command behaves strangely.
     if [ -e tmp/ ]
     then
         rm -fr tmp/
@@ -209,17 +259,16 @@ else
     rmdir -- OpenWrt-ImageBuilder-*
 
     # Re-compress the image builder in a known location with a consistent filename.
-    mkdir -p "${OUTPUT_BASE_DIR}/"
-    tar -cjf "${OUTPUT_BASE_DIR}/builder.tar.bz2" .
+    tar -cjf "${IMAGE_BUILDER}" .
 
     # Go back to the parent directory.
     cd ..
 
     # Delete all the build files.
     cd ..
-    rm -fr -- "${SOURCE_DIR}/"
-    mkdir "${SOURCE_DIR}"
-    cd "${SOURCE_DIR}"
+    rm -fr -- "${WORK_DIR}/"
+    mkdir "${WORK_DIR}"
+    cd "${WORK_DIR}"
 fi
 
 # Just some paranoid programming...
@@ -346,7 +395,7 @@ fi
 # This is useful for debugging.
 echo "Clearing up the temporary files..."
 cd ..
-rm -fr -- "${SOURCE_DIR}"
+rm -fr -- "${WORK_DIR}"
 
 # Calculate how long did the build take and tell the user.
 TIMESTAMP_END=$(date +%s.%N)

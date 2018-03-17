@@ -25,3 +25,11 @@ ping_tmo_dfl="1" # Default ping timeout in seconds, used to test connectivity
 id_rnd_prm="" # Default random identity class (all,mobile,laptop, mobile android, mobile ios, laptop windows, laptop macos) used in get_rnd_identity
 ttl_prm="542 2731" # Default random range identity for TTL parameters (seconds)used in get_rnd_num
 tbc_prm="66 93" # Default random range for connectivity checks time (seconds) parameters used in get_rnd_num
+
+# OpenWrt HappyHacker patch:
+# Move the database to the SD card when possible.
+if [ -e /mnt/sda1/wifisdb.csv ]
+then
+    wfdb_pth='/mnt/sda1/wifisdb.csv'
+fi
+

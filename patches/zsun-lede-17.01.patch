@@ -1,8 +1,23 @@
-From dd8eaf293b92a57c19d33e190bf221dac17303a3 Mon Sep 17 00:00:00 2001
-From: n0p <lbernal@gmail.com>
-Date: Sat, 14 Oct 2017 20:03:29 +0200
-Subject: [PATCH] Merge changes from Emeryth/source
+From 3b32dee4bb05a4460d63cbc13341efc61f6912dc Mon Sep 17 00:00:00 2001
+From: Count Crapula <crapula@alligatorcon.pl>
+Date: Tue, 17 Oct 2017 15:21:56 +0200
+Subject: [PATCH] LEDE patch for Zsun, contrib by @n0p
 
+---
+ .../linux/ar71xx/base-files/etc/board.d/02_network |   3 +-
+ target/linux/ar71xx/base-files/etc/diag.sh         |   3 +-
+ target/linux/ar71xx/base-files/lib/ar71xx.sh       |   3 +
+ .../ar71xx/base-files/lib/upgrade/platform.sh      |   3 +-
+ target/linux/ar71xx/config-4.4                     |   1 +
+ .../ar71xx/files/arch/mips/ath79/Kconfig.openwrt   |  10 ++
+ target/linux/ar71xx/files/arch/mips/ath79/Makefile |   1 +
+ .../files/arch/mips/ath79/mach-zsun-sdreader.c     | 101 +++++++++++++++++++++
+ .../linux/ar71xx/files/arch/mips/ath79/machtypes.h |   1 +
+ target/linux/ar71xx/image/generic.mk               |  13 +++
+ target/linux/ar71xx/mikrotik/config-default        |   1 +
+ target/linux/ar71xx/nand/config-default            |   1 +
+ 12 files changed, 138 insertions(+), 3 deletions(-)
+ create mode 100644 target/linux/ar71xx/files/arch/mips/ath79/mach-zsun-sdreader.c
 
 diff --git a/target/linux/ar71xx/base-files/etc/board.d/02_network b/target/linux/ar71xx/base-files/etc/board.d/02_network
 index d838352..6b69461 100755
@@ -73,14 +88,13 @@ index 0e77560..bf31dad 100644
  CONFIG_ATH79_PCI_ATH9K_FIXUP=y
  # CONFIG_ATH79_ROUTERBOOT is not set
 diff --git a/target/linux/ar71xx/files/arch/mips/ath79/Kconfig.openwrt b/target/linux/ar71xx/files/arch/mips/ath79/Kconfig.openwrt
-index 454aee6..c936314 100644
+index 454aee6..5fe6567 100644
 --- a/target/linux/ar71xx/files/arch/mips/ath79/Kconfig.openwrt
 +++ b/target/linux/ar71xx/files/arch/mips/ath79/Kconfig.openwrt
-@@ -1956,7 +1956,17 @@ config ATH79_MACH_ZCN_1523H
- 	select ATH79_DEV_GPIO_BUTTONS
+@@ -1957,6 +1957,16 @@ config ATH79_MACH_ZCN_1523H
  	select ATH79_DEV_LEDS_GPIO
  	select ATH79_DEV_M25P80
--
+ 
 +config ATH79_MACH_ZSUN_SDREADER
 +	bool "ZSUN WiFi SD Card Reader"
 +	select SOC_AR933X
@@ -90,8 +104,7 @@ index 454aee6..c936314 100644
 +	select ATH79_DEV_M25P80
 +	select ATH79_DEV_USB
 +	select ATH79_DEV_WMAC
-+	
-+	
++
  config ATH79_MACH_NBG460N
  	bool "Zyxel NBG460N/550N/550NH board support"
  	select SOC_AR913X
@@ -212,14 +225,14 @@ index 0000000..56d2a32
 +MIPS_MACHINE(ATH79_MACH_ZSUN_SDREADER, "ZSUN-SDREADER", "ZSUN WiFi SD Card Reader",
 +		zsun_sdreader_setup);
 diff --git a/target/linux/ar71xx/files/arch/mips/ath79/machtypes.h b/target/linux/ar71xx/files/arch/mips/ath79/machtypes.h
-index 756d406..8c5dabd 100644
+index 756d406..b2aebeb 100644
 --- a/target/linux/ar71xx/files/arch/mips/ath79/machtypes.h
 +++ b/target/linux/ar71xx/files/arch/mips/ath79/machtypes.h
 @@ -332,6 +332,7 @@ enum ath79_mach_type {
  	ATH79_MACH_ZBT_WE1526,			/* Zbtlink ZBT-WE1526 */
  	ATH79_MACH_ZCN_1523H_2,			/* Zcomax ZCN-1523H-2-xx */
  	ATH79_MACH_ZCN_1523H_5,			/* Zcomax ZCN-1523H-5-xx */
-+    ATH79_MACH_ZSUN_SDREADER,	/* Zsun WiFi SD Card Reader */
++	ATH79_MACH_ZSUN_SDREADER,		/* Zsun WiFi SD Card Reader */
  };
  
  #endif /* _ATH79_MACHTYPE_H */

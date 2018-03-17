@@ -54,4 +54,3 @@ if [[ $(which realpath | wc -l) == 0 ]]
 then
     apt-get install -y realpath
 fi
-

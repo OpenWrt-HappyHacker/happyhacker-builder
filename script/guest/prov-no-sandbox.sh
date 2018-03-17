@@ -35,10 +35,6 @@ grep -q "$LINE" "$FILE" || echo "$LINE" >> "$FILE"
 # This script runs as root.
 source /OUTSIDE/script/guest/prov-packages.sh
 
-# Setup the build environment.
-# This script runs as an unprivileged user.
-su $1 -c /OUTSIDE/script/guest/prov-environment.sh
-
 # Mark the environment as provisioned.
 touch /OUTSIDE/.provisioned
 

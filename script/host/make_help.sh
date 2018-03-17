@@ -16,9 +16,6 @@ To completely clean up everything
 (including the container/VM and output files):
     make dirclean
 
-To begin preparing a new profile from scratch:
-    make menuconfig
-
 To modify the OpenWrt configuration for an existing profile:
     make menuconfig CONFIG=<profile>
 

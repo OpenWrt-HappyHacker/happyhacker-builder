@@ -9,6 +9,9 @@ start() {
 	/sbin/block detect | sed "s/enabled\t'0'/enabled\t'1'/g" > /etc/config/fstab
 	/sbin/block mount
 
+	# Apply the MicroSD card filesystem changes.
+	/etc/sdcard_fixes.sh
+
 }
 
 stop() {

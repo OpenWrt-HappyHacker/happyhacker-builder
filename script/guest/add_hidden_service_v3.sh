@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script inserts a legacy hidden service configuration into the torrc configuration file.
+# This script inserts a next-gen hidden service configuration into the torrc configuration file.
 # The onion hostname and keys are assumed to have been already created.
 # See also the create_hidden_service.sh and create_tor_key.sh scripts.
 # Usage:
@@ -21,10 +21,10 @@ fi
 
 # Prepare the new content to be added to the torrc file.
 HIDDEN_SERVICE_DIR="/etc/tor/lib/hidden_service/$1/"
-CONFIG_TEXT="HiddenServiceDir ${HIDDEN_SERVICE_DIR}\n"
+CONFIG_TEXT="HiddenServiceDir ${HIDDEN_SERVICE_DIR}\nHiddenServiceVersion 3\n"
 for PORT in "${@:2}"
 do
-    echo "Adding new legacy Tor hidden service $1 on port ${PORT}."
+    echo "Adding new next-gen Tor hidden service $1 on port ${PORT}."
     CONFIG_TEXT="${CONFIG_TEXT}HiddenServicePort ${PORT} 127.0.0.1:${PORT}\n"
 done
 

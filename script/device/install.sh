@@ -7,12 +7,11 @@
 #    openwrt-ar71xx-generic-zsun-sdreader-kernel.bin
 #    openwrt-ar71xx-generic-zsun-sdreader-rootfs-squashfs.bin
 #
-# 2) Join the wireless AP created by the ZSUN device
-#    (begins with "zd-" followed by a number)
+# 2) Use the ZSUN mobile app to switch to "Wireless shared drive" mode.
+#    If plugged to a PC make sure to unmount the drive first.
 #
-# 3) Run this command to switch the device to USB card mode:
-#    $ curl http://10.168.168.1:8080/goform/Setcardworkmode?workmode=0
-#    (You may have to try a couple times)
+# 3) Join the wireless AP created by the ZSUN device
+#    (begins with "zd-" followed by a number)
 #
 # 4) Log in to the device using its practical firmware backdoor ;)
 #    $ telnet 10.168.168.1 11880

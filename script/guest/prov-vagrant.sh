@@ -45,10 +45,6 @@ source /OUTSIDE/script/guest/prov-packages.sh
 # Setup the vagrant home folder.
 su ${VAGRANT_USER} -c /OUTSIDE/script/guest/prov-vagrant-user.sh
 
-# Setup the build environment.
-# This script runs as an unprivileged user.
-su ${VAGRANT_USER} -c /OUTSIDE/script/guest/prov-environment.sh
-
 # Print the last banner.
 >&2 echo "---------------------------------------------------------------------"
 >&2 echo "DONE"

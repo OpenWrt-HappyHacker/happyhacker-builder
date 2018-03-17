@@ -13,9 +13,16 @@ fi
 # If the shared folder exists, unmount it.
 # It is VERY IMPORTANT to do this BEFORE destroying the container,
 # otherwise we would be deleting the host files as well.
-if [[ $(mount | grep ^bindfs | grep -F "bindfs on /var/lib/lxd/containers/${LXD_CONTAINER_NAME}/rootfs/OUTSIDE" | wc -c) = 0 ]]
+if [[ $(mount | grep ^bindfs | grep -F "bindfs on /var/lib/lxd/containers/${LXD_CONTAINER_NAME}/rootfs/OUTSIDE" | wc -c) = 0 ]] # Ubuntu
 then
-    echo "Shared folder already unmounted, nothing to do."
+    LXD_CONTAINER_REAL_PATH=$(realpath "/var/lib/lxd/containers/${LXD_CONTAINER_NAME}/rootfs/OUTSIDE")
+    if [[ $(mount | grep -F "${LXD_CONTAINER_REAL_PATH} type fuse" | wc -c) = 0 ]]                                              # Fedora
+    then
+        echo "Shared folder already unmounted, nothing to do."
+    else
+        echo "Unmounting shared folder... (this may trigger a sudo prompt)"
+        sudo umount -f "${LXD_CONTAINER_REAL_PATH}"
+    fi
 else
     echo "Unmounting shared folder... (this may trigger a sudo prompt)"
     sudo umount -f "/var/lib/lxd/containers/${LXD_CONTAINER_NAME}/rootfs/OUTSIDE"

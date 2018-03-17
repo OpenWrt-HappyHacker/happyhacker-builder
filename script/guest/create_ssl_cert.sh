@@ -37,7 +37,8 @@ else
 fi
 
 # Switch to the output directory, so we can use relative paths.
-pushd "$2" >/dev/null
+mkdir -p -- "$2"
+pushd -- "$2" >/dev/null
 
 # If there is a profile root cert, use it.
 if [ -e "${CA_CERT}" ]

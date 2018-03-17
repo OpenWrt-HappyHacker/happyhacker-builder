@@ -1,1 +1,1 @@
-Secure file drop machine. Upload and share your files through Tor, bypassing unlawful censorship.
+This profile generates a "dead drop" device. It allows sharing files anonymously over Tor.

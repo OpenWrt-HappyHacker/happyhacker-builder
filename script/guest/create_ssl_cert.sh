@@ -97,7 +97,7 @@ ${SSL_PASS}
 ${CA_CERT_EMAIL}
 EOF
 openssl x509 -req -days ${SSL_CERT_DAYS} -in "${SSL_CERT}.csr" -CA "${CA_CERT}" -CAkey "${CA_KEY}" -set_serial 01 -out "${SSL_CERT}.crt" >/dev/null 2>&1
-openssl pkcs12 -export -out "${SSL_CERT}.p12" -inkey "${SSL_CERT}.key" -in "${SSL_CERT}.crt" -chain -CAfile "${CA_CERT}" >/dev/null 2>&1 < $(echo "${SSL_PASS}")
+echo -e "${SSL_PASS}\n${SSL_PASS}" | openssl pkcs12 -export -out "${SSL_CERT}.p12" -inkey "${SSL_CERT}.key" -in "${SSL_CERT}.crt" -chain -CAfile "${CA_CERT}" >/dev/null 2>&1
 echo "New SSL certificate created for domain: $1"
 
 # Go back to the original current directory.

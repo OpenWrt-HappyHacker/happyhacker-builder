@@ -12,8 +12,14 @@ set -e
 source script/config.sh
 
 # Get the current user and group names.
-CURRENT_USER=$(id -un)
-CURRENT_GROUP=$(id -gn)
+# Since this script will always be called with sudo, we can get this from the environment.
+if [ -z "${SUDO_UID}" ]
+then
+    echo "Internal error :("     # should never fail, but...
+    exit 1
+fi
+CURRENT_USER=${SUDO_UID}
+CURRENT_GROUP=${SUDO_GID}
 
 # Get the container's user and group names.
 # Note how we use the unprivileged user and group for this.
